@@ -4,11 +4,15 @@
 
 int main()
 {
-    Deep::FullyConnected fcLayer(3, 5);
-    Eigen::MatrixXd batchedInput(4, 3);
-    batchedInput << 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
+    Deep::FullyConnected fcLayer(3, 5, true);
+    Eigen::VectorXd in(3);
+    in << 1,5,10;
 
-    Eigen::MatrixXd output { fcLayer(batchedInput) };
+    Eigen::MatrixXd output { fcLayer(in) };
 
+    Eigen::VectorXd endGradient(5);
+    endGradient << 1, 0.5, 0.2, 1, 1;
+    fcLayer.backward(endGradient);
+    fcLayer.backward(endGradient);
     return 0;
 }
