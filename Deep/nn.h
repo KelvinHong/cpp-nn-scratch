@@ -15,7 +15,7 @@ class FullyConnected
     private: 
         Eigen::MatrixXd weights;
         Eigen::MatrixXd gradients;
-        Eigen::VectorXd cacheInput;
+        Eigen::MatrixXd cacheInput;
     public:
         int in_c;
         int out_c;
@@ -23,14 +23,16 @@ class FullyConnected
         /* Constructor determines the weights dimension, 
         then initialize weights */ 
         FullyConnected(const int& in_channel, const int& out_channel, const bool& use_grad=true);
-        /* Single pass Forward call (overload) */
-        Eigen::MatrixXd operator()(const Eigen::VectorXd& in);
         /* Batched Forward call (overload) */
         Eigen::MatrixXd operator()(const Eigen::MatrixXd& in); 
-        /* Calculate backward gradients */
-        void backward(const Eigen::VectorXd& endGradient);
+        /* Calculate batched backward gradients */
+        void backward(const Eigen::MatrixXd& endGradient);
         /* Zero the gradient */
         void zeroGrad();
+        /* Handy function to inspect the weights */
+        const decltype(weights)& viewWeights();
+        /* Handy function to inspect the gradients */
+        const decltype(gradients)& viewGradients();
 };
 }
 
