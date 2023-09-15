@@ -6,7 +6,6 @@
 
 std::mt19937 Deep::gen(std::random_device{}());
 
-
 Deep::FullyConnected::FullyConnected(const int& in_channel, const int& out_channel, const bool& use_grad):
     weights(Eigen::MatrixXd()), gradients(Eigen::MatrixXd()), cacheInput(Eigen::MatrixXd()),
     in_c(in_channel), out_c(out_channel), requires_grad(use_grad)
