@@ -1,5 +1,6 @@
 #ifndef NN_H
 #define NN_H
+#include "base.h"
 #include <Eigen/Dense>
 #include <random>
 
@@ -7,10 +8,6 @@ namespace Deep
 {
 extern std::mt19937 gen;
 
-/* All layer types should inherited from Layer class. */
-class Layer 
-{
-};
 
 /* FullyConnected layer will not be using 
 tensor, as 2D-matrices are sufficient for 
