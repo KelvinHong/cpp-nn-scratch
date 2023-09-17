@@ -21,10 +21,9 @@ class FullyConnected: public Layer
     public:
         int in_c;
         int out_c;
-        bool requires_grad;
         /* Constructor determines the weights dimension, 
         then initialize weights */ 
-        FullyConnected(const int& in_channel, const int& out_channel, const bool& use_grad=true);
+        FullyConnected(const int& in_channel, const int& out_channel);
         /* Batched Forward call (overload) */
         Eigen::MatrixXd operator()(const Eigen::MatrixXd& in); 
         /* Calculate batched backward gradients */

@@ -6,9 +6,9 @@
 
 std::mt19937 Deep::gen(std::random_device{}());
 
-Deep::FullyConnected::FullyConnected(const int& in_channel, const int& out_channel, const bool& use_grad):
+Deep::FullyConnected::FullyConnected(const int& in_channel, const int& out_channel):
     weights(Eigen::MatrixXd()), gradients(Eigen::MatrixXd()), cacheInput(Eigen::MatrixXd()),
-    in_c(in_channel), out_c(out_channel), requires_grad(use_grad)
+    in_c(in_channel), out_c(out_channel)
 {
     // Check in_c and out_c are positive;
     if (in_channel <= 0 || out_channel <= 0)
@@ -41,10 +41,7 @@ Eigen::MatrixXd Deep::FullyConnected::operator()(const Eigen::MatrixXd& in)
     assert(in.cols() == in_c);
 
     /* Only remember input in cache if requiring gradient calculation */
-    if (requires_grad)
-    {
-        cacheInput = in;
-    }
+    cacheInput = in;
         
     Eigen::MatrixXd out {in * weights.transpose()};
 
@@ -59,7 +56,6 @@ void Deep::FullyConnected::backward(const Eigen::MatrixXd& endGradient)
     weights.shape == [m, n],
     cacheInput.shape == [B, n].
     */
-   assert(requires_grad);
     assert(endGradient.cols() == weights.rows());
     assert(endGradient.rows() == cacheInput.rows());
     // Increment the gradient instead of assign
