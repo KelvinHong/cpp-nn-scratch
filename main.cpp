@@ -1,10 +1,11 @@
 #include "Deep/nn.h"
+#include "Deep/node.h"
 #include <iostream>
 #include <Eigen/Dense>
 
 int testFC()
 {
-    Deep::FullyConnected fcLayer(3, 5, true);
+    Deep::FullyConnected fcLayer(3, 5);
     Eigen::MatrixXd in(4, 3);
     in << 1,2,3,4,5,6,7,8,9,10,11,12;
 
@@ -28,7 +29,9 @@ int testFC()
 
 int main()
 {
-    testFC();
+    // testFC();
+    Eigen::MatrixXd x { Eigen::MatrixXd::Zero(2,3) };
+    Deep::AccumulateGrad<Eigen::MatrixXd> node1(x);
 
     return 0;
 }
