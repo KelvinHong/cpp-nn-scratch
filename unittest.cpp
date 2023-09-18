@@ -52,6 +52,14 @@ int testAccumulateGrad()
     return 0;
 }
 
+int testWxBackward()
+{
+    // Assumes y=Wx, 
+    // This initializes a graph of WxBackward->AccumulateGrad
+    // We 
+    return 0;
+}
+
 int testNode()
 {
     /* Test all Node derived classes */

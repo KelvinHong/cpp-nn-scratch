@@ -6,7 +6,7 @@ import torch
 
 def recursive_nf(next_fs, level = 1):
     for i in range(len(next_fs)):
-        print("===="*level + str(level) + ": " + type(next_fs[i][0]).__name__)
+        print("===="*level + str(level) + ": " + next_fs[i][0].__class__.__name__)
         if next_fs[i][0] is not None:
             recursive_nf(next_fs[i][0].next_functions, level=level+1)
     
@@ -14,6 +14,7 @@ def recursive_nf(next_fs, level = 1):
 
 def visualize_node(loss: torch.Tensor):
     print("Start visualizing...")
+    print(loss.grad_fn)
     print(loss.grad_fn.__class__.__name__)
     recursive_nf(loss.grad_fn.next_functions)
     print("End of visualization.")
