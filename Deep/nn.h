@@ -4,6 +4,12 @@
 #include <Eigen/Dense>
 #include <random>
 
+/* The code need some re-sturcture:
+Backward should be a responsibility of Node(s)
+not Layer(s). 
+We should let Node reference Layer's parameters
+then backward on Node will affect Layer's 
+parameters. */
 namespace Deep
 {
 extern std::mt19937 gen;
