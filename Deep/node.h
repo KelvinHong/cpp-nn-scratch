@@ -42,7 +42,8 @@ class Node
         Node transpose();
         /* Overload Matrix Multiplication */
         Node operator*(Node& other);
-        // Node operator* (const double& other);
+        
+        
 
         /* Backward */
         /* Backward for Loss, they typically uses default gradient of 1. */

@@ -20,8 +20,8 @@ def visualize_node(loss: torch.Tensor):
     print("End of visualization.")
 
 x = torch.rand((5,3), requires_grad=True)
-fc1 = torch.nn.Linear(3, 4)
-fc2 = torch.nn.Linear(4, 6)
+fc1 = torch.nn.Linear(3, 4, bias=False)
+fc2 = torch.nn.Linear(4, 6, bias=False)
 x1 = fc1(x)
 x2 = torch.nn.ReLU()(x1)
 y = fc2(x2)

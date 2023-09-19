@@ -93,8 +93,9 @@ int Node::descendents(int level, bool verbose)
 {   
     int ret { 1 };
     if (verbose)
-        std::cout << std::string(level * 4, '=') << 
-            this->gradientFunction << '\n';
+        std::cout << std::string(level * 4, '=') 
+            << level << ": " 
+            << this->gradientFunction << '\n';
     if (this->nextNodes.size() == 0){ return ret; }
 
     for (Node* nodePtr: this->nextNodes)
