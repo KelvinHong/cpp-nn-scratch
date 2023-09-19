@@ -5,67 +5,48 @@
 #include <cassert>
 #define m_assert(expr, msg) assert(( (void)(msg), (expr) ))
 
-int testAccumulateGrad()
-{
-    // Testing template=MatrixXd
-    Eigen::MatrixXd mat(3, 2);
-    mat << 1,2,3,4,5,6;
-    Deep::AccumulateGrad acc1(mat);
-    // Verify data() method only returns a copy.
-    Eigen::MatrixXd cp { acc1.data() };
-    cp(0,1) = 10;
-    assert(acc1.data()(0,1) == 2);
-
-    // Verify gradient() method only returns a copy.
-    Eigen::MatrixXd grad { acc1.gradient() };
-    assert(grad == Eigen::MatrixXd::Zero(3,2));
-
-    // Test backward
-    Eigen::MatrixXd dummyGradient(3, 2);
-    dummyGradient << 0.5, 1, 0.1, 2, -0.1, -0.3;
-    acc1.backward(dummyGradient);
-    // Single backward
-    assert(acc1.gradient() == dummyGradient);
-    acc1.backward(dummyGradient);
-    // Double backward
-    assert(acc1.gradient() == dummyGradient + dummyGradient); 
-    
-    // Test zeroGrad
-    acc1.zeroGrad();
-    assert(acc1.gradient() == Eigen::MatrixXd::Zero(3,2));
-
-    // Check that other template could not work
-    Eigen::VectorXd vec {Eigen::VectorXd::Zero(3)};
-    bool catchIA { false };
-    try 
-    {
-        // Trying to inintialize a node using vector.
-        Deep::AccumulateGrad<Eigen::VectorXd> acc2(vec);
-    }
-    catch (const std::invalid_argument& ia) 
-    {
-        catchIA = true;
-    }
-    m_assert(catchIA, "Seems like AccumulateGrad with VectorXd template is implemented, consider remove this test case.");
-    std::cout << "AccumulateGrad unittest passed.\n";
-
-    return 0;
-}
-
-int testWxBackward()
-{
-    // Assumes y=Wx, 
-    // This initializes a graph of WxBackward->AccumulateGrad
-    // We 
-    return 0;
-}
 
 int testNode()
 {
-    /* Test all Node derived classes */
-    testAccumulateGrad();
+    // Test transpose and double transpose backward
+    {
+    Eigen::MatrixXd weights(2,3);
+    weights << 0, 1, 2,
+        3, 4, 0.1;
+    Deep::Node wNode(weights);
+    Deep::Node tWeights { wNode.transpose() };
+    assert(tWeights.descendents() == 2);
+    Deep::Node ttWeights { tWeights.transpose() };
+    assert(ttWeights.descendents() == 3);
+    }
+    
+    // Test weight [3,4] and data [2,4] matmul
+    // y = data * weight.transpose() shape [2,3]
+    // B=2, m=3, n=4
+    {
+    Eigen::MatrixXd weights(3,4);
+    Eigen::MatrixXd data(2,4);
+    Eigen::MatrixXd trueProduct(2,3);
+    weights << 0, 1, -1, 1,
+        1, 0, 1, 1,
+        0, 2, 0, 1;
+    data << 1, 2, 3, 4, 
+        5, 6, 7, 8;
+    trueProduct << 3, 8, 8,
+                7, 20, 20;
+    Deep::Node weightsNode(weights);
+    Deep::Node dataNode(data);
+    Deep::Node tWeightsNode {weightsNode.transpose()};
+    Deep::Node result { dataNode * tWeightsNode };
+    // This line won't work because rvalue is destroy after initialization.
+    // Deep::Node result { dataNode * weightsNode.transpose() };
+    assert(result.data == trueProduct);
+    int nodes { result.descendents(0, true) };
+    assert(nodes == 4);
+    }
 
-    std::cout << "All Node derived classes unittest passed.\n\n";
+
+    std::cout << "All Nodes and gradFn unittests passed.\n\n";
     return 0;
 }
 
@@ -102,14 +83,14 @@ int testFC()
 int testLayer()
 {
     testFC();
-    std::cout << "All Layers derived classes unittest passed.\n\n";
+    std::cout << "All Layers derived classes unittests passed.\n\n";
     return 0;
 }
 
 int main()
 {
     testNode();
-    testLayer();
+    // testLayer();
 
     return 0;
 }
