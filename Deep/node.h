@@ -60,6 +60,7 @@ class Node
         /* Show descendents (only their gradfn),
         return the total number of nodes */
         int descendents(int level = 0, bool verbose = false);
+        int descendents(bool verbose);
 };
 
 

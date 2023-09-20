@@ -42,7 +42,8 @@ int testNode()
     // This line won't work because rvalue is destroy after initialization.
     // Deep::Node result { dataNode * weightsNode.transpose() };
     assert(result.data == trueProduct);
-    assert(result.descendents() == 4);
+    assert(result.descendents(true) == 4);
+    assert(result.nextNodes[0] == &dataNode);
     }
 
     /* Test ReLU */
@@ -98,7 +99,7 @@ int testNode()
     Deep::Node x2Node { Deep::F::relu(x1Node) };
     Deep::Node yNode { x2Node * tw2Node };
     Deep::Node lossNode { Deep::F::sum(yNode) };
-    // lossNode.descendents(0, true);
+    lossNode.descendents(true);
     }
 
 

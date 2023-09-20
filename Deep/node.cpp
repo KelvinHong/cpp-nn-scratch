@@ -105,4 +105,9 @@ int Node::descendents(int level, bool verbose)
     return ret;
 }
 
+int Node::descendents(bool verbose)
+{
+    return Node::descendents(0, verbose);
+}
+
 }
