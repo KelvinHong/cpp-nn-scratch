@@ -1,4 +1,3 @@
-#include "Deep/functional.h"
 #include "Deep/node.h"
 #include "Deep/nn.h"
 #include <iostream>
@@ -7,6 +6,9 @@
 #include <cassert>
 #define m_assert(expr, msg) assert(( (void)(msg), (expr) ))
 
+// Node Shared Pointer
+using NSP = std::shared_ptr<Deep::Node>;  
+
 int testNode()
 {
     // Test transpose and double transpose backward
@@ -14,11 +16,9 @@ int testNode()
     Eigen::MatrixXd weights(2,3);
     weights << 0, 1, 2,
         3, 4, 0.1;
-    Deep::Node wNode(weights);
-    Deep::Node tWeights { wNode.transpose() };
-    assert(tWeights.descendents() == 2);
-    Deep::Node ttWeights { tWeights.transpose() };
-    assert(ttWeights.descendents() == 3);
+    NSP wPtr {std::make_shared<Deep::Node>(weights)};
+    NSP twPtr { wPtr->transpose()};
+    assert(twPtr->descendents() == 2);
     }
     
     // Test weight [3,4] and data [2,4] matmul
@@ -35,18 +35,16 @@ int testNode()
         5, 6, 7, 8;
     trueProduct << 3, 8, 8,
                 7, 20, 20;
-    Deep::Node weightsNode(weights);
-    Deep::Node dataNode(data);
-    Deep::Node tWeightsNode {weightsNode.transpose()};
-    Deep::Node result { dataNode * tWeightsNode };
-    // This line won't work because rvalue is destroy after initialization.
-    // Deep::Node result { dataNode * weightsNode.transpose() };
-    assert(result.data == trueProduct);
-    assert(result.descendents(true) == 4);
-    assert(result.nextNodes[0] == &dataNode);
+    NSP W {std::make_shared<Deep::Node>(weights)};
+    NSP X {std::make_shared<Deep::Node>(data)};
+    NSP result { X * (W->transpose()) };
+    assert(result -> data == trueProduct);
+    assert(result -> descendents() == 4);
+    assert(result->nextNodes[0] == X);
+    assert(result->nextNodes[1]->nextNodes[0] == W);
     }
 
-    /* Test ReLU */
+    // /* Test ReLU */
     {
     Eigen::MatrixXd x(2,3);
     x << 1,5,0,
@@ -54,10 +52,10 @@ int testNode()
     Eigen::MatrixXd trueResult(2,3);
     trueResult << 1,5,0,
                 0,0,3;
-    Deep::Node xNode(x);
-    Deep::Node xRelu { Deep::F::relu(xNode) };
-    assert( xRelu.descendents() == 2 );
-    assert( xRelu.data == trueResult );
+    NSP xPtr { std::make_shared<Deep::Node>(x) };
+    NSP xRelu { xPtr -> relu() };
+    assert(xRelu->descendents() == 2);
+    assert(xRelu->data == trueResult);
     }
 
     /* Test sum */
@@ -66,14 +64,16 @@ int testNode()
     y << 0,1,1,0,
         1,2,-1,1,
         0.5,0.4,1,2;
+    // Below might be unused when NDEBUG is enabled.
     [[maybe_unused]] double trueValue {8.9};
-    Deep::Node yNode(y);
-    Deep::Node ySum { Deep::F::sum(yNode) };
-    assert( ySum.descendents() == 2 );
-    assert( ySum.data(0,0) == trueValue );
+
+    NSP yPtr { std::make_shared<Deep::Node>(y) };
+    NSP ySum { yPtr->sum() };
+    assert( ySum->descendents() == 2 );
+    assert( ySum->data(0,0) == trueValue );
     }
 
-    /* Test composite */
+    /* Test composite functions */
     {
     Eigen::MatrixXd x(3,2);
     x << 1,2,
@@ -90,16 +90,29 @@ int testNode()
                 5,4,0.2,-0.4,-0.3,
                 -0.1,-1,-2,3,1,
                 0,0,5,2,2;
-    Deep::Node xNode(x);
-    Deep::Node w1Node(weights1);
-    Deep::Node w2Node(weights2);
-    Deep::Node tw1Node { w1Node.transpose() };
-    Deep::Node tw2Node { w2Node.transpose() };
-    Deep::Node x1Node { xNode * tw1Node };
-    Deep::Node x2Node { Deep::F::relu(x1Node) };
-    Deep::Node yNode { x2Node * tw2Node };
-    Deep::Node lossNode { Deep::F::sum(yNode) };
-    lossNode.descendents(true);
+    NSP xPtr { std::make_shared<Deep::Node>(x) };
+    NSP w1Ptr { std::make_shared<Deep::Node>(weights1) };
+    NSP w2Ptr { std::make_shared<Deep::Node>(weights2) };
+    /* Use the logic of 
+    L = sum( (relu(x*W1T))*W2T ) */
+    NSP LPtr {
+        (
+            (
+                (xPtr*(w1Ptr->transpose()))
+                -> relu()
+            ) * 
+            (
+                w2Ptr -> transpose()
+            )
+        ) -> sum()
+    };
+    assert(LPtr->descendents() == 9);
+    assert(LPtr->nextNodes[0]->nextNodes[1]->nextNodes[0] == w2Ptr);
+    assert(LPtr->nextNodes[0]->nextNodes[0]->nextNodes[0]
+        ->nextNodes[1]->nextNodes[0] == w1Ptr);
+    assert(LPtr->nextNodes[0]->nextNodes[0]->nextNodes[0]->nextNodes[0] == xPtr);
+    assert(LPtr->nextNodes[0]->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::matMulBackward);
+    assert(LPtr->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::reluBackward);
     }
 
 

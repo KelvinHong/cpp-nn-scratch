@@ -1,17 +1,12 @@
 #include <iostream>
-// #include <memory>  //declarations of unique_ptr
+#include <memory>  //declarations of unique_ptr
 // #include <string>
-
-int* dummy()
-{
-    int* x = new int{5};
-    return x;
-}
 
 int main()
 {
-    int* ptr { dummy() };
-    std::cout << *ptr << '\n';
-    delete ptr;
+    std::shared_ptr<int> ptr1 {std::make_shared<int>(5)};
+    int y = 4;
+    std::shared_ptr<int> ptr2 {std::make_shared<int>(y)};
+    
     return 0;
 }

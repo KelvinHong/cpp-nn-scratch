@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream& out, const gradFn gf){
     return out;
 }
 
-Node::Node(T x, bool isleaf, std::vector<Node*> nextnodes, gradFn gradfn):
+Node::Node(T x, bool isleaf, std::vector<std::shared_ptr<Node>> nextnodes, gradFn gradfn):
     data(x), gradient(T{}), isLeaf(isleaf), nextNodes(nextnodes), gradientFunction(gradfn)
 {
     // zero-initialize gradient
@@ -67,25 +67,70 @@ Node::Node(T x, bool isleaf, std::vector<Node*> nextnodes, gradFn gradfn):
 };
 
 /* Overloading operators */
-Node Node::transpose()
+std::unique_ptr<Node> Node::transpose()
 {
-    // Create a new node that points to this.
-    Node tNode(this->data.transpose(), false, std::vector<Node*> {this}, gradFn::transposeBackward);
-    return tNode;
-}
-
-Node Node::operator*(Node& other)
-{
-    assert(this->data.cols() == other.data.rows());
-    Node matmulNode(this->data * other.data, false, 
-        std::vector<Node*> {this, &other}, Deep::gradFn::matMulBackward);
+    std::unique_ptr<Node> nodePtr(
+        std::make_unique<Node>(
+            shared_from_this() -> data.transpose(),
+            false,
+            std::vector<std::shared_ptr<Node>> {shared_from_this()},
+            gradFn::transposeBackward
+        )
+    );
     
-    return matmulNode;
+    return nodePtr;
 }
 
-std::ostream& operator<< (std::ostream &out, const Node& node)
+std::unique_ptr<Node> Node::relu()
 {
-    out << node.data;
+    Eigen::MatrixXd x { shared_from_this()->data };
+    x = x.unaryExpr([](double num){
+        return (num>0) ? num : 0.0;
+    });
+    std::unique_ptr<Node> nodePtr(
+        std::make_unique<Node>(
+            x,
+            false,
+            std::vector<std::shared_ptr<Node>> {shared_from_this()},
+            gradFn::reluBackward
+        )
+    );
+    return nodePtr;
+}
+
+std::unique_ptr<Node> Node::sum()
+{
+    Eigen::MatrixXd summation(1,1);
+    summation << shared_from_this() -> data.sum();
+    std::unique_ptr<Node> nodePtr(
+        std::make_unique<Node>(
+            summation,
+            false,
+            std::vector<std::shared_ptr<Node>> {shared_from_this()},
+            gradFn::sumBackward
+        )
+    );
+    return nodePtr;
+}
+
+std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
+{
+    assert(a->data.cols() == b->data.rows());
+    std::shared_ptr<Node> matmulPtr(
+        std::make_shared<Node>(
+            a->data * b->data, 
+            false, 
+            std::vector<std::shared_ptr<Node>> {a, b}, 
+            Deep::gradFn::matMulBackward
+        )
+    );
+    
+    return matmulPtr;
+}
+
+std::ostream& operator<< (std::ostream &out, const std::shared_ptr<Node>& node)
+{
+    out << node->data;
     return out;    
 }
 
@@ -95,10 +140,10 @@ int Node::descendents(int level, bool verbose)
     if (verbose)
         std::cout << std::string(level * 4, '=') 
             << level << ": " 
-            << this->gradientFunction << '\n';
-    if (this->nextNodes.size() == 0){ return ret; }
+            << shared_from_this()->gradientFunction << '\n';
+    if (shared_from_this()->nextNodes.size() == 0){ return ret; }
 
-    for (Node* nodePtr: this->nextNodes)
+    for (std::shared_ptr<Node> nodePtr: shared_from_this()->nextNodes)
     {
         ret += nodePtr->descendents(level+1, verbose);
     }
