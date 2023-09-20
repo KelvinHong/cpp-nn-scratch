@@ -3,9 +3,9 @@
 #include "Deep/nn.h"
 #include <iostream>
 #include <Eigen/Dense>
+// #define NDEBUG
 #include <cassert>
 #define m_assert(expr, msg) assert(( (void)(msg), (expr) ))
-
 
 int testNode()
 {
@@ -65,7 +65,7 @@ int testNode()
     y << 0,1,1,0,
         1,2,-1,1,
         0.5,0.4,1,2;
-    double trueValue {8.9};
+    [[maybe_unused]] double trueValue {8.9};
     Deep::Node yNode(y);
     Deep::Node ySum { Deep::F::sum(yNode) };
     assert( ySum.descendents() == 2 );
@@ -98,7 +98,7 @@ int testNode()
     Deep::Node x2Node { Deep::F::relu(x1Node) };
     Deep::Node yNode { x2Node * tw2Node };
     Deep::Node lossNode { Deep::F::sum(yNode) };
-    lossNode.descendents(0, true);
+    // lossNode.descendents(0, true);
     }
 
 
