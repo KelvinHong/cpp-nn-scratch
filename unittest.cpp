@@ -11,7 +11,7 @@ using NSP = std::shared_ptr<Deep::Node>;
 
 int testNode()
 {
-    // Test transpose and double transpose backward
+    // Test transpose backward
     {
     Eigen::MatrixXd weights(2,3);
     weights << 0, 1, 2,
@@ -42,6 +42,11 @@ int testNode()
     assert(result -> descendents() == 4);
     assert(result->nextNodes[0] == X);
     assert(result->nextNodes[1]->nextNodes[0] == W);
+    // Below checks that ptr of W^T is only stored once in the final node
+    // because we didn't store the transpose anywhere else. 
+    // This make sure the transpose is stored properly and minimally. 
+    assert(result->nextNodes[1].use_count() == 1);
+    
     }
 
     // /* Test ReLU */
@@ -113,6 +118,7 @@ int testNode()
     assert(LPtr->nextNodes[0]->nextNodes[0]->nextNodes[0]->nextNodes[0] == xPtr);
     assert(LPtr->nextNodes[0]->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::matMulBackward);
     assert(LPtr->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::reluBackward);
+    
     }
 
 

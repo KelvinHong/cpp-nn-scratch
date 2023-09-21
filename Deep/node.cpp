@@ -136,14 +136,27 @@ std::ostream& operator<< (std::ostream &out, const std::shared_ptr<Node>& node)
 
 int Node::descendents(int level, bool verbose)
 {   
+    if (level == 0 && verbose)
+    {
+        std::cout << "Showing backward graph for node at " << this << '\n';
+        std::cout << "Numbers in parentheses shows how many pointers are "
+            "referencing the node.\n";
+    }
+        
+        
     int ret { 1 };
     if (verbose)
         std::cout << std::string(level * 4, '=') 
             << level << ": " 
-            << shared_from_this()->gradientFunction << '\n';
-    if (shared_from_this()->nextNodes.size() == 0){ return ret; }
+            << this->gradientFunction 
+            /* minus use count by 1 because 
+            this function creates a temporary copy of this. */
+            << " (" << shared_from_this().use_count() - 1
+            << ")\n";
+    
+    if (this->nextNodes.size() == 0){ return ret; }
 
-    for (std::shared_ptr<Node> nodePtr: shared_from_this()->nextNodes)
+    for (const std::shared_ptr<Node>& nodePtr: this->nextNodes)
     {
         ret += nodePtr->descendents(level+1, verbose);
     }
