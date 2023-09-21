@@ -170,9 +170,9 @@ int testNode()
     assert(LPtr->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::reluBackward);
     
     LPtr->backward();
-    std::cout << "X gradient\n" << xPtr->gradient << '\n';
-    std::cout << "W1 gradient\n" << w1Ptr->gradient << '\n';
-    std::cout << "W2 gradient\n" << w2Ptr->gradient << '\n';
+    // std::cout << "X gradient\n" << xPtr->gradient << '\n';
+    // std::cout << "W1 gradient\n" << w1Ptr->gradient << '\n';
+    // std::cout << "W2 gradient\n" << w2Ptr->gradient << '\n';
     }
 
 
