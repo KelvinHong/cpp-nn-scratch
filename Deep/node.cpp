@@ -113,6 +113,50 @@ std::unique_ptr<Node> Node::sum()
     return nodePtr;
 }
 
+void Node::backward(T fromGradient)
+{
+    /* gradient should have the same shape as data */
+    assert((this->data.rows() == fromGradient.rows()) 
+        && "Gradient doesn't have the same number of rows as data.");
+    assert((this->data.cols() == fromGradient.cols()) 
+        && "Gradient doesn't have the same number of cols as data.");
+    
+    switch (this->gradientFunction)
+    { 
+        case gradFn::sumBackward:
+        {
+            // Get the shape
+            T nextData { this->nextNodes[0]->data };
+            int r { static_cast<int>(nextData.rows()) };
+            int c { static_cast<int>(nextData.cols()) };
+            T toGradient{ T(r,c) };
+            toGradient.fill(1);
+            this->nextNodes[0]->backward(toGradient);
+            break;
+        }
+            
+        default:
+            std::cout << "The backward function for " 
+                << this->gradientFunction 
+                << " is not implemented yet.\n";
+            throw std::invalid_argument(
+                "The gradient function is not implemented yet."
+                " See the last error message above."
+            );
+    }
+
+}
+
+void Node::backward()
+{
+    /* Backward without parameter can only be used with a 1x1 data. */
+    assert(this->data.size() == 1 && "Backward without parameter should be used "
+        "on a node with a scalar data (i.e., 1x1 matrix.)");
+    Eigen::MatrixXd dummy(1,1);
+    dummy << 1;
+    this->backward(dummy);
+}
+
 std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
 {
     assert(a->data.cols() == b->data.rows());

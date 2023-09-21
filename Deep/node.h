@@ -46,10 +46,10 @@ class Node : public std::enable_shared_from_this<Node>
         
 
         /* Backward */
-        /* Backward for Loss, they typically uses default gradient of 1. */
-        void backward(); 
         /* Backward for intermediate nodes. */
         void backward(T fromGradient);
+        /* Backward for Loss, they typically uses default gradient of 1. */
+        void backward();
 
         /* Custom destructor: Destruct self and every next nodes 
         except accumulateGrad. */

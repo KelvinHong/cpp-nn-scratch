@@ -118,7 +118,42 @@ int testNode()
     assert(LPtr->nextNodes[0]->nextNodes[0]->nextNodes[0]->nextNodes[0] == xPtr);
     assert(LPtr->nextNodes[0]->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::matMulBackward);
     assert(LPtr->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::reluBackward);
-    
+    }
+
+    /* Test Backward */
+    {
+    Eigen::MatrixXd x(3,2);
+    x << 1,2,
+        3,4,
+        5,6;
+    Eigen::MatrixXd weights1(5,2);
+    weights1 << 0,0,
+                1,0,
+                -1,0,
+                0.5,0.1,
+                1,2;
+    Eigen::MatrixXd weights2(4,5);
+    weights2 << 0,0,1,2,0.1,
+                5,4,0.2,-0.4,-0.3,
+                -0.1,-1,-2,3,1,
+                0,0,5,2,2;
+    NSP xPtr { std::make_shared<Deep::Node>(x) };
+    NSP w1Ptr { std::make_shared<Deep::Node>(weights1) };
+    NSP w2Ptr { std::make_shared<Deep::Node>(weights2) };
+    /* Use the logic of 
+    L = sum( (relu(x*W1T))*W2T ) */
+    NSP LPtr {
+        (
+            (
+                (xPtr*(w1Ptr->transpose()))
+                -> relu()
+            ) * 
+            (
+                w2Ptr -> transpose()
+            )
+        ) -> sum()
+    };
+    LPtr->backward();
     }
 
 
