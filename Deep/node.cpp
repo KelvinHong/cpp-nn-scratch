@@ -66,6 +66,11 @@ Node::Node(T x, bool isleaf, std::vector<std::shared_ptr<Node>> nextnodes, gradF
     
 };
 
+void Node::zeroGrad()
+{
+    gradient.fill(0.0);
+}
+
 /* Overloading operators */
 std::unique_ptr<Node> Node::transpose()
 {
@@ -83,7 +88,7 @@ std::unique_ptr<Node> Node::transpose()
 
 std::unique_ptr<Node> Node::relu()
 {
-    Eigen::MatrixXd x { shared_from_this()->data };
+    Eigen::MatrixXd x { this->data };
     x = x.unaryExpr([](double num){
         return (num>0) ? num : 0.0;
     });
@@ -115,25 +120,55 @@ std::unique_ptr<Node> Node::sum()
 
 void Node::backward(T fromGradient)
 {
+    /* Refuse if gradfn is none. */
+    if (this->gradientFunction == gradFn::none)
+        return ;
     /* gradient should have the same shape as data */
     assert((this->data.rows() == fromGradient.rows()) 
         && "Gradient doesn't have the same number of rows as data.");
     assert((this->data.cols() == fromGradient.cols()) 
         && "Gradient doesn't have the same number of cols as data.");
     
+    // First solve accumulate Grad, which is a leaf node.
+    if (this->gradientFunction == gradFn::accumulateGrad)
+    {
+        gradient += fromGradient;
+        return;
+    }
+    // For other, get the shape of first next node.
     switch (this->gradientFunction)
     { 
-        case gradFn::sumBackward:
+        case gradFn::transposeBackward:
         {
-            // Get the shape
-            T nextData { this->nextNodes[0]->data };
-            int r { static_cast<int>(nextData.rows()) };
-            int c { static_cast<int>(nextData.cols()) };
-            T toGradient{ T(r,c) };
-            toGradient.fill(1);
-            this->nextNodes[0]->backward(toGradient);
+            this->nextNodes[0]->backward(fromGradient.transpose());
             break;
         }
+        case gradFn::matMulBackward:
+        {
+            T data1 { this->nextNodes[0]->data };
+            T data2 { this->nextNodes[1]->data };
+            this->nextNodes[0]->backward(fromGradient * data2.transpose());
+            this->nextNodes[1]->backward(data1.transpose() * fromGradient);
+            break;
+        }
+        case gradFn::reluBackward:
+        {
+            T mask { this->nextNodes[0]->data };
+            mask = mask.unaryExpr([](double num){
+                return static_cast<double>(num>0);
+            });
+            this->nextNodes[0]->backward(fromGradient.cwiseProduct(mask));
+            break;
+        }
+        case gradFn::sumBackward:
+        {
+            T toGradient{ this->nextNodes[0]->data };
+            /* sumBackward node must contains a scalar [1,1] matrix. */
+            toGradient.fill(fromGradient(0,0));
+            this->nextNodes[0]->backward(toGradient);
+            break;
+        } /* temporary toGradient destroyed here, so it is not stored.
+        I should think of a way for user to retain gradients. TODO */ 
             
         default:
             std::cout << "The backward function for " 
@@ -147,14 +182,19 @@ void Node::backward(T fromGradient)
 
 }
 
-void Node::backward()
+void Node::backward(double fromGradient)
 {
-    /* Backward without parameter can only be used with a 1x1 data. */
     assert(this->data.size() == 1 && "Backward without parameter should be used "
         "on a node with a scalar data (i.e., 1x1 matrix.)");
     Eigen::MatrixXd dummy(1,1);
-    dummy << 1;
+    dummy << fromGradient;
     this->backward(dummy);
+}
+
+void Node::backward()
+{
+    /* Backward without parameter can only be used with a 1x1 data. */
+    this->backward(1.0);
 }
 
 std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
