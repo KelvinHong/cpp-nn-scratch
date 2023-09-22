@@ -9,8 +9,9 @@ jobs:
     build-and-test:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
-            - name: Compile using Makefile 
-                run: make
-            - name: Run the test
-                run: ./autotest
+        - name: Checkout 
+            uses: actions/checkout@v2
+        - name: Compile using Makefile 
+            run: make
+        - name: Run the test
+            run: ./autotest
