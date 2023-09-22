@@ -1,15 +1,12 @@
 #ifndef NN_H
 #define NN_H
 #include "base.h"
+#include "node.h"
 #include <Eigen/Dense>
 #include <random>
 
-/* The code need some re-sturcture:
-Backward should be a responsibility of Node(s)
-not Layer(s). 
-We should let Node reference Layer's parameters
-then backward on Node will affect Layer's 
-parameters. */
+// Node Shared Pointer
+using NSP = std::shared_ptr<Deep::Node>;
 namespace Deep
 {
 extern std::mt19937 gen;
@@ -21,25 +18,20 @@ all operations. */
 class FullyConnected: public Layer
 {
     private: 
-        Eigen::MatrixXd weights;
-        Eigen::MatrixXd gradients;
-        Eigen::MatrixXd cacheInput;
-    public:
+        bool useBias;
+        bool requiresGrad;
         int in_c;
         int out_c;
+    public:
+        NSP weights;
+        NSP biases;
         /* Constructor determines the weights dimension, 
         then initialize weights */ 
-        FullyConnected(const int& in_channel, const int& out_channel);
+        FullyConnected(int in_channel, int out_channel, bool use_bias = true, bool requires_grad = true);
         /* Batched Forward call (overload) */
-        Eigen::MatrixXd operator()(const Eigen::MatrixXd& in); 
-        /* Calculate batched backward gradients */
-        void backward(const Eigen::MatrixXd& endGradient);
-        /* Zero the gradient */
-        void zeroGrad();
-        /* Handy function to inspect the weights */
-        const decltype(weights)& viewWeights();
-        /* Handy function to inspect the gradients */
-        const decltype(gradients)& viewGradients();
+        NSP operator()(NSP in); 
+        /* Get pointers to the weights */
+        std::vector<NSP> parameters();
 };
 }
 

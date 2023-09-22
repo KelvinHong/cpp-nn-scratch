@@ -37,6 +37,9 @@ std::ostream& operator<<(std::ostream& out, const gradFn gf){
         case addBackward: 
             out << "addBackward";
             break;
+        case addMmBackward:
+            out << "addMmBackward";
+            break;
         default:
             throw std::invalid_argument("This case has not been recorded yet.");
 
@@ -53,10 +56,11 @@ Node::Node(T x, bool isleaf, std::vector<std::shared_ptr<Node>> nextnodes, gradF
     gradient = T::Zero(x.rows(), x.cols());
     // if isleaf is true, verify gradfn is accumulateGrad. 
     // else throw and error.
-    if (isleaf && (gradientFunction != Deep::gradFn::accumulateGrad))
+    if (isleaf && (gradientFunction != Deep::gradFn::accumulateGrad) 
+        && (gradientFunction != Deep::gradFn::none))
     {
         throw std::invalid_argument(
-            "For a leaf node, gradient function must be Deep::gradFn::accumulateGrad."
+            "For a leaf node, gradient function must be Deep::gradFn::accumulateGrad or none."
         );
     }
     // if isleaf is true, there shouldn't be any next nodes.
@@ -68,6 +72,9 @@ Node::Node(T x, bool isleaf, std::vector<std::shared_ptr<Node>> nextnodes, gradF
     }
     
 };
+
+Node::Node(T x, gradFn gradfn): 
+    Node(x, true, std::vector<std::shared_ptr<Node>>{}, gradfn) {}
 
 void Node::zeroGrad()
 {
@@ -188,6 +195,13 @@ void Node::backward(T fromGradient)
             T data2 { this->nextNodes[1]->data };
             this->nextNodes[0]->backward(fromGradient * data2.transpose());
             this->nextNodes[1]->backward(data1.transpose() * fromGradient);
+            break;
+        }
+        case gradFn::addMmBackward:
+        {
+            this->nextNodes[0]->backward(fromGradient.colwise().sum().transpose());
+            this->nextNodes[1]->backward(fromGradient * this->nextNodes[2]->data.transpose());
+            this->nextNodes[2]->backward(this->nextNodes[1]->data.transpose() * fromGradient);
             break;
         }
         case gradFn::reluBackward:
@@ -329,6 +343,24 @@ int Node::descendents(int level, bool verbose)
 int Node::descendents(bool verbose)
 {
     return Node::descendents(0, verbose);
+}
+
+std::shared_ptr<Node> affine(std::shared_ptr<Node> b, std::shared_ptr<Node> x, std::shared_ptr<Node> W)
+{
+    /* Some routine dimensional checks */
+    assert(x->data.cols() == W->data.rows());
+    assert(W->data.cols() == b->data.rows());
+    assert(b->data.cols() == 1);
+
+    Eigen::MatrixXd newData {x->data * W->data};
+    newData.rowwise() += Eigen::RowVectorXd(b->data.col(0));
+    std::shared_ptr<Node> retPtr {std::make_shared<Node>(
+        newData,
+        false,
+        std::vector<std::shared_ptr<Node>> {b,x,W},
+        Deep::gradFn::addMmBackward
+    )};
+    return retPtr;
 }
 
 }

@@ -7,7 +7,7 @@
 #define m_assert(expr, msg) assert(( (void)(msg), (expr) ))
 
 // Node Shared Pointer
-using NSP = std::shared_ptr<Deep::Node>;  
+using NSP = std::shared_ptr<Deep::Node>;
 
 int testNode()
 {
@@ -16,7 +16,7 @@ int testNode()
     Eigen::MatrixXd weights(2,3);
     weights << 0, 1, 2,
         3, 4, 0.1;
-    NSP wPtr {std::make_shared<Deep::Node>(weights)};
+    NSP wPtr {std::make_shared<Deep::Node>(weights, Deep::gradFn::accumulateGrad)};
     NSP twPtr { wPtr->transpose()};
     assert(twPtr->descendents() == 2);
 
@@ -43,8 +43,8 @@ int testNode()
         5, 6, 7, 8;
     trueProduct << 3, 8, 8,
                 7, 20, 20;
-    NSP W {std::make_shared<Deep::Node>(weights)};
-    NSP X {std::make_shared<Deep::Node>(data)};
+    NSP W {std::make_shared<Deep::Node>(weights, Deep::gradFn::accumulateGrad)};
+    NSP X {std::make_shared<Deep::Node>(data, Deep::gradFn::accumulateGrad)};
     NSP result { X * (W->transpose()) };
     assert(result -> data == trueProduct);
     assert(result -> descendents() == 4);
@@ -81,7 +81,7 @@ int testNode()
     Eigen::MatrixXd trueResult(2,3);
     trueResult << 1,5,0,
                 0,0,3;
-    NSP xPtr { std::make_shared<Deep::Node>(x) };
+    NSP xPtr { std::make_shared<Deep::Node>(x, Deep::gradFn::accumulateGrad) };
     NSP xRelu { xPtr -> relu() };
     assert(xRelu->descendents() == 2);
     assert(xRelu->data == trueResult);
@@ -109,7 +109,7 @@ int testNode()
     // Below might be unused when NDEBUG is enabled.
     [[maybe_unused]] double trueValue {8.9};
 
-    NSP yPtr { std::make_shared<Deep::Node>(y) };
+    NSP yPtr { std::make_shared<Deep::Node>(y, Deep::gradFn::accumulateGrad) };
     NSP ySum { yPtr->sum() };
     assert( ySum->descendents() == 2 );
     assert( ySum->data(0,0) == trueValue );
@@ -146,8 +146,8 @@ int testNode()
                 -0.1,-1,-2,3,1,
                 0,0,5,2,2;
     NSP xPtr { std::make_shared<Deep::Node>(x) };
-    NSP w1Ptr { std::make_shared<Deep::Node>(weights1) };
-    NSP w2Ptr { std::make_shared<Deep::Node>(weights2) };
+    NSP w1Ptr { std::make_shared<Deep::Node>(weights1, Deep::gradFn::accumulateGrad) };
+    NSP w2Ptr { std::make_shared<Deep::Node>(weights2, Deep::gradFn::accumulateGrad) };
     /* Use the logic of 
     L = sum( (relu(x*W1T))*W2T ) */
     NSP LPtr {
@@ -184,8 +184,8 @@ int testNode()
     w2 << -1,-0.9,-0.7,1,0,0;
     
     NSP xPtr { std::make_shared<Deep::Node>(x) };
-    NSP w1Ptr { std::make_shared<Deep::Node>(w1) };
-    NSP w2Ptr { std::make_shared<Deep::Node>(w2) };
+    NSP w1Ptr { std::make_shared<Deep::Node>(w1, Deep::gradFn::accumulateGrad) };
+    NSP w2Ptr { std::make_shared<Deep::Node>(w2, Deep::gradFn::accumulateGrad) };
     NSP LPtr { Deep::sum(Deep::relu(w1Ptr * xPtr) + (w2Ptr * xPtr)) };
     assert(LPtr->descendents() == 8); // Should be 8 w.r.t. uniqueness.
     LPtr -> backward();
@@ -197,11 +197,13 @@ int testNode()
 
 int testFC()
 {
-    Deep::FullyConnected fcLayer(3, 5);
+    // Test FullyConnected layer without bias
+    {
+    Deep::FullyConnected fcLayer(3, 5, false);
     Eigen::MatrixXd in(4, 3);
     in << 1,2,3,4,5,6,7,8,9,10,11,12;
-
-    Eigen::MatrixXd output { fcLayer(in) };
+    NSP inPtr {std::make_shared<Deep::Node>(in)};
+    NSP outPtr { fcLayer(inPtr) };
 
     Eigen::MatrixXd endGradient(4, 5);
     endGradient << 1, 0.5, 0.5, 1, 1,
@@ -209,18 +211,74 @@ int testFC()
             1, 1, 1, 1, 1,
             1, 1, 1, 1, 1;
             
-    // Check gradients are zeros
-    assert(fcLayer.viewGradients() == Eigen::MatrixXd::Zero(5,3));
-    fcLayer.backward(endGradient);
+    outPtr->backward(endGradient);
     Eigen::MatrixXd expectGradient(5,3);
     expectGradient << 14,16,18,
                     15.5,17.5,19.5,
                     13.5,15,16.5,
                     16,18.5,21,
                     17.2,20,22.8;
-    assert(fcLayer.viewGradients() == expectGradient);
-    fcLayer.zeroGrad();
-    assert(fcLayer.viewGradients() == Eigen::MatrixXd::Zero(5,3));
+    assert(outPtr->nextNodes[1]->nextNodes[0]->gradient == expectGradient);
+
+    // Use layer's parameters, no bias layer should only have one element.
+    assert(fcLayer.parameters().size() == 1);
+    NSP wPtr { fcLayer.parameters()[0] };
+    assert(wPtr->gradient.isApprox(expectGradient, 1e-6));
+    }
+
+    // Test FullyConnected layer with bias
+    {
+    Deep::FullyConnected fcLayer(3, 5);
+    Eigen::MatrixXd in(4, 3);
+    in << 1,2,3,4,5,6,7,8,9,10,11,12;
+    NSP inPtr {std::make_shared<Deep::Node>(in)};
+    NSP outPtr { fcLayer(inPtr) };
+
+    Eigen::MatrixXd endGradient(4, 5);
+    endGradient << 1, 0.5, 0.5, 1, 1,
+                -1, -0.5, -1, -0.5, -0.2,
+                1, 1, 1, 1, 1,
+                1, 1, 1, 1, 1;
+            
+    outPtr->backward(endGradient);
+    Eigen::MatrixXd expectWeightGradient(5,3);
+    expectWeightGradient << 14,16,18,
+                    15.5,17.5,19.5,
+                    13.5,15,16.5,
+                    16,18.5,21,
+                    17.2,20,22.8;
+    Eigen::MatrixXd expectBiasGradient(5,1);
+    expectBiasGradient << 2, 2, 1.5, 2.5, 2.8;
+    assert(outPtr->nextNodes[0]->gradient == expectBiasGradient);
+    assert(outPtr->nextNodes[2]->nextNodes[0]->gradient == expectWeightGradient);
+
+    // Use layer's parameters, no bias layer should only have one element.
+    std::vector<NSP> wbList { fcLayer.parameters() };
+    assert(wbList.size() == 2);
+    NSP wPtr { wbList[0] };
+    NSP bPtr { wbList[1] };
+    assert(wPtr->gradient.isApprox(expectWeightGradient, 1e-6));
+    assert(bPtr->gradient.isApprox(expectBiasGradient, 1e-6));
+    }
+
+    // Test composite fcLayer 
+    {
+    Eigen::MatrixXd x(4,3);
+    x << -10,-9,1,
+        1, 2, 3,
+        2, -1, -3,
+        4, 3, 0;
+    NSP xPtr {std::make_shared<Deep::Node>(x)};
+    Deep::FullyConnected fc1(3, 5);
+    Deep::FullyConnected fc2(5, 2);
+    NSP LPtr {
+        Deep::sum(
+            fc2(Deep::relu(fc1(xPtr)))
+        )
+    };
+    assert(LPtr->descendents() == 11);
+    }
+
     std::cout << "Fully Connected Layer unittest passed.\n";
     return 0; // Everything works well.
 }
@@ -235,7 +293,7 @@ int testLayer()
 int main()
 {
     testNode();
-    // testLayer();
+    testLayer();
 
     return 0;
 }

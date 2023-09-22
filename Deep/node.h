@@ -18,6 +18,7 @@ enum gradFn {
     reluBackward,
     sumBackward,
     addBackward,
+    addMmBackward,
 };
 
 class Node : public std::enable_shared_from_this<Node>
@@ -36,7 +37,9 @@ class Node : public std::enable_shared_from_this<Node>
         */
         Node(T x, bool isleaf = true, 
             std::vector<std::shared_ptr<Node>> nextnodes = std::vector<std::shared_ptr<Node>>{}, 
-            gradFn gradfn = gradFn::accumulateGrad);
+            gradFn gradfn = gradFn::none);
+        /* Overloading constructor for convenience */
+        Node(T x, gradFn gradfn);
 
         /* Clear gradient */
         void zeroGrad();
@@ -77,6 +80,8 @@ std::shared_ptr<Node> operator+(std::shared_ptr<Node> a, std::shared_ptr<Node> b
 std::shared_ptr<Node> relu(std::shared_ptr<Node> a);
 /* Overload Sum */
 std::shared_ptr<Node> sum(std::shared_ptr<Node> a);
+/* Affine transformation b + x * W. */
+std::shared_ptr<Node> affine(std::shared_ptr<Node> b, std::shared_ptr<Node> x, std::shared_ptr<Node> W);
 }
 
 #endif

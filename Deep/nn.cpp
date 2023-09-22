@@ -1,15 +1,19 @@
+#include "base.h"
+#include "node.h"
 #include "nn.h"
 #include <Eigen/Dense>
 #include <random>
 #include <iostream>
-#include <assert.h>
+#include <memory>
+#include <cassert>
 
 std::mt19937 Deep::gen(std::random_device{}());
 
-Deep::FullyConnected::FullyConnected(const int& in_channel, const int& out_channel):
-    weights(Eigen::MatrixXd()), gradients(Eigen::MatrixXd()), cacheInput(Eigen::MatrixXd()),
-    in_c(in_channel), out_c(out_channel)
+Deep::FullyConnected::FullyConnected(int in_channel, int out_channel, bool use_bias, bool requires_grad):
+    useBias(use_bias), requiresGrad(requires_grad), in_c(in_channel), out_c(out_channel),
+    weights(nullptr), biases(nullptr)
 {
+    gradFn mode { requiresGrad ? gradFn::accumulateGrad : gradFn::none };
     // Check in_c and out_c are positive;
     if (in_channel <= 0 || out_channel <= 0)
         throw std::invalid_argument("Input channel and output channel must both be positive. ");
@@ -20,16 +24,21 @@ Deep::FullyConnected::FullyConnected(const int& in_channel, const int& out_chann
     std::uniform_real_distribution<double> weightDis(-xavierGap, xavierGap);
 
     // Initialize weights.
-    weights = Eigen::MatrixXd::NullaryExpr(out_c,in_c,
+    Eigen::MatrixXd weightsData = Eigen::MatrixXd::NullaryExpr(out_c,in_c,
         [&](){return weightDis(Deep::gen);}
     );
-    // Zero-initialize gradients.
-    gradients = Eigen::MatrixXd::Zero(out_c, in_c);
+    weights = std::make_shared<Deep::Node>(weightsData, mode);
+    // If use bias, zero initialize bias.
+    if (useBias)
+    {
+        Eigen::MatrixXd biasesData = Eigen::MatrixXd::Zero(out_c, 1);
+        biases = std::make_shared<Deep::Node>(biasesData, mode);
+    }
 }
 
 
 
-Eigen::MatrixXd Deep::FullyConnected::operator()(const Eigen::MatrixXd& in)
+NSP Deep::FullyConnected::operator()(NSP in)
 {
     /*This is the batched forward function of linear layer, mimicking 
     PyTorch's Layer.__call__() signature, we overload the 
@@ -38,46 +47,24 @@ Eigen::MatrixXd Deep::FullyConnected::operator()(const Eigen::MatrixXd& in)
     input (in) assumed to be of shape [B, in_c]
     output will be of shape [B, out_c].
     */  
-    assert(in.cols() == in_c);
+    assert(in->data.cols() == in_c && "Input data dimension doesn't match FC Layer's in_c.");
 
-    /* Only remember input in cache if requiring gradient calculation */
-    cacheInput = in;
-        
-    Eigen::MatrixXd out {in * weights.transpose()};
+    NSP out;
+    if (useBias)
+    {
+        out = Deep::affine(biases, in, weights->transpose());
+    }
+    else
+    {
+        out = in * (weights->transpose());
+    }
 
     return out;
 }
 
-void Deep::FullyConnected::backward(const Eigen::MatrixXd& endGradient)
+std::vector<NSP> Deep::FullyConnected::parameters()
 {
-    // endGradient is the gradient coming from later layer. 
-    // Check shape agreement.
-    /*Assume endGradient.shape == [B, m],
-    weights.shape == [m, n],
-    cacheInput.shape == [B, n].
-    */
-    assert(endGradient.cols() == weights.rows());
-    assert(endGradient.rows() == cacheInput.rows());
-    // Increment the gradient instead of assign
-    // In case user want to intentionally backward multiple times.    
-    gradients += (endGradient.transpose() * cacheInput);
-    // std::cout << "Input is\n" << cacheInput << '\n';
-    // std::cout << "Supplied gradient is\n" << endGradient << '\n';
-    // std::cout << "weights are\n" << weights << '\n';
-    // std::cout << "gradients are\n" << gradients << '\n';
-}
-
-void Deep::FullyConnected::zeroGrad()
-{   
-    gradients.setZero();
-}
-
-const decltype(Deep::FullyConnected::weights)& Deep::FullyConnected::viewWeights() 
-{ 
-    return weights;
-}
-
-const decltype(Deep::FullyConnected::gradients)& Deep::FullyConnected::viewGradients() 
-{ 
-    return gradients;
+    std::vector<NSP> ret {weights};
+    if (useBias) ret.push_back(biases);
+    return ret;
 }
