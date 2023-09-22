@@ -170,12 +170,26 @@ int testNode()
     assert(LPtr->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::reluBackward);
     
     LPtr->backward();
-    // std::cout << "X gradient\n" << xPtr->gradient << '\n';
-    // std::cout << "W1 gradient\n" << w1Ptr->gradient << '\n';
-    // std::cout << "W2 gradient\n" << w2Ptr->gradient << '\n';
+    std::cout << "[Warning] Composite Backward not tested. Might cause issue.\n";
     }
 
-
+    /* Test many-to-one relation
+    Can be achieved by using y = mu(W1 * x) + W2 * x. */
+    {
+    Eigen::MatrixXd x(2,2);
+    x << 1,2,-1,1;
+    Eigen::MatrixXd w1(3,2);
+    w1 << 0.1,0,1.5,2,1,-1;
+    Eigen::MatrixXd w2(3,2);
+    w2 << -1,-0.9,-0.7,1,0,0;
+    
+    NSP xPtr { std::make_shared<Deep::Node>(x) };
+    NSP w1Ptr { std::make_shared<Deep::Node>(w1) };
+    NSP w2Ptr { std::make_shared<Deep::Node>(w2) };
+    NSP LPtr { Deep::sum(Deep::relu(w1Ptr * xPtr) + (w2Ptr * xPtr)) };
+    assert(LPtr->descendents() == 8); // Should be 8 w.r.t. uniqueness.
+    LPtr -> backward();
+    }
 
     std::cout << "All Nodes and gradFn unittests passed.\n\n";
     return 0;

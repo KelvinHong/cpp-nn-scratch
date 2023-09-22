@@ -3,7 +3,7 @@
 #include <Eigen/Dense>
 #include <vector>
 #include <iostream>
-#include <map>
+#include <set>
 
 using T = Eigen::MatrixXd;
 
@@ -33,6 +33,9 @@ std::ostream& operator<<(std::ostream& out, const gradFn gf){
             break;
         case sumBackward: 
             out << "sumBackward";
+            break;
+        case addBackward: 
+            out << "addBackward";
             break;
         default:
             throw std::invalid_argument("This case has not been recorded yet.");
@@ -86,6 +89,7 @@ std::shared_ptr<Node> Node::transpose()
     return nodePtr;
 }
 
+/* Class ReLU */
 std::shared_ptr<Node> Node::relu()
 {
     Eigen::MatrixXd x { this->data };
@@ -103,6 +107,24 @@ std::shared_ptr<Node> Node::relu()
     return nodePtr;
 }
 
+/* Standalone ReLU */
+std::shared_ptr<Node> relu(std::shared_ptr<Node> a)
+{
+    Eigen::MatrixXd x { a->data };
+    x = x.unaryExpr([](double num){
+        return (num>0) ? num : 0.0;
+    });
+    std::shared_ptr<Node> nodePtr(
+        std::make_shared<Node>(
+            x,
+            false,
+            std::vector<std::shared_ptr<Node>> {a},
+            gradFn::reluBackward
+        )
+    );
+    return nodePtr;
+}
+
 std::shared_ptr<Node> Node::sum()
 {
     Eigen::MatrixXd summation(1,1);
@@ -112,6 +134,21 @@ std::shared_ptr<Node> Node::sum()
             summation,
             false,
             std::vector<std::shared_ptr<Node>> {shared_from_this()},
+            gradFn::sumBackward
+        )
+    );
+    return nodePtr;
+}
+
+std::shared_ptr<Node> sum(std::shared_ptr<Node> a)
+{
+    Eigen::MatrixXd summation(1,1);
+    summation << a -> data.sum();
+    std::shared_ptr<Node> nodePtr(
+        std::make_shared<Node>(
+            summation,
+            false,
+            std::vector<std::shared_ptr<Node>> {a},
             gradFn::sumBackward
         )
     );
@@ -138,6 +175,8 @@ void Node::backward(T fromGradient)
     // For other, get the shape of first next node.
     switch (this->gradientFunction)
     { 
+        /* temporary toGradient destroyed after switch, so it is not stored.
+        I should think of a way for user to retain gradients. TODO */ 
         case gradFn::transposeBackward:
         {
             this->nextNodes[0]->backward(fromGradient.transpose());
@@ -167,9 +206,15 @@ void Node::backward(T fromGradient)
             toGradient.fill(fromGradient(0,0));
             this->nextNodes[0]->backward(toGradient);
             break;
-        } /* temporary toGradient destroyed here, so it is not stored.
-        I should think of a way for user to retain gradients. TODO */ 
-            
+        } 
+        case gradFn::addBackward:
+        {
+            /* Simple propagate the gradient to the 
+            next two components. */
+            this->nextNodes[0]->backward(fromGradient);
+            this->nextNodes[1]->backward(fromGradient);
+            break;
+        }
         default:
             std::cout << "The backward function for " 
                 << this->gradientFunction 
@@ -212,6 +257,21 @@ std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b
     return matmulPtr;
 }
 
+std::shared_ptr<Node> operator+(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
+{
+    assert(a->data.rows() == b->data.rows());
+    assert(a->data.cols() == b->data.cols());
+    std::shared_ptr<Node> addPtr(
+        std::make_shared<Node>(
+            a->data + b->data, 
+            false, 
+            std::vector<std::shared_ptr<Node>> {a, b}, 
+            Deep::gradFn::addBackward
+        )
+    );
+    return addPtr;
+}
+
 std::ostream& operator<< (std::ostream &out, const std::shared_ptr<Node>& node)
 {
     out << node->data;
@@ -228,7 +288,6 @@ int Node::descendents(int level, bool verbose)
     }
         
         
-    int ret { 1 };
     if (verbose)
         std::cout << std::string(level * 4, '=') 
             << level << ": " 
@@ -236,15 +295,35 @@ int Node::descendents(int level, bool verbose)
             /* minus use count by 1 because 
             this function creates a temporary copy of this. */
             << " (" << shared_from_this().use_count() - 1
+            << ", [" << this << ']'
             << ")\n";
     
-    if (this->nextNodes.size() == 0){ return ret; }
+    if (this->nextNodes.size() == 0){ return 1; }
 
     for (const std::shared_ptr<Node>& nodePtr: this->nextNodes)
     {
-        ret += nodePtr->descendents(level+1, verbose);
+        nodePtr->descendents(level+1, verbose);
     }
-    return ret;
+    // Calculate number of nodes using DFS
+    std::set<std::shared_ptr<Node>> visited {};
+    std::vector<std::shared_ptr<Node>> stack {shared_from_this()};
+    while (stack.size() > 0)
+    {
+        std::shared_ptr<Node> curr {stack.back()};
+        stack.pop_back();
+        if (visited.find(curr) == visited.end())
+        {
+            visited.insert(curr);
+
+            for (std::shared_ptr<Node> nextNode: curr->nextNodes)
+            {
+                if (visited.find(nextNode) == visited.end())
+                    stack.push_back(nextNode);
+            }
+        }
+    }
+
+    return static_cast<int>(visited.size());
 }
 
 int Node::descendents(bool verbose)

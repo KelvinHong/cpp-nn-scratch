@@ -17,6 +17,7 @@ enum gradFn {
     matMulBackward,
     reluBackward,
     sumBackward,
+    addBackward,
 };
 
 class Node : public std::enable_shared_from_this<Node>
@@ -70,7 +71,12 @@ class Node : public std::enable_shared_from_this<Node>
 
 /* Overload Matrix Multiplication */
 std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b);
-
+/* Overload Matrix Addition */
+std::shared_ptr<Node> operator+(std::shared_ptr<Node> a, std::shared_ptr<Node> b);
+/* Overload ReLU */
+std::shared_ptr<Node> relu(std::shared_ptr<Node> a);
+/* Overload Sum */
+std::shared_ptr<Node> sum(std::shared_ptr<Node> a);
 }
 
 #endif
