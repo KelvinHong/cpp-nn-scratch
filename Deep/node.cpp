@@ -40,6 +40,9 @@ std::ostream& operator<<(std::ostream& out, const gradFn gf){
         case addMmBackward:
             out << "addMmBackward";
             break;
+        case subtractBackward:
+            out << "subtractBackward";
+            break;
         default:
             throw std::invalid_argument("This case has not been recorded yet.");
 
@@ -166,13 +169,6 @@ void Node::backward(T fromGradient)
             this->nextNodes[1]->backward(data1.transpose() * fromGradient);
             break;
         }
-        case gradFn::addMmBackward:
-        {
-            this->nextNodes[0]->backward(fromGradient.colwise().sum().transpose());
-            this->nextNodes[1]->backward(fromGradient * this->nextNodes[2]->data.transpose());
-            this->nextNodes[2]->backward(this->nextNodes[1]->data.transpose() * fromGradient);
-            break;
-        }
         case gradFn::reluBackward:
         {
             T mask { this->nextNodes[0]->data };
@@ -196,6 +192,19 @@ void Node::backward(T fromGradient)
             next two components. */
             this->nextNodes[0]->backward(fromGradient);
             this->nextNodes[1]->backward(fromGradient);
+            break;
+        }
+        case gradFn::addMmBackward:
+        {
+            this->nextNodes[0]->backward(fromGradient.colwise().sum().transpose());
+            this->nextNodes[1]->backward(fromGradient * this->nextNodes[2]->data.transpose());
+            this->nextNodes[2]->backward(this->nextNodes[1]->data.transpose() * fromGradient);
+            break;
+        }
+        case gradFn::subtractBackward:
+        {
+            this->nextNodes[0]->backward(fromGradient);
+            this->nextNodes[1]->backward(-fromGradient);
             break;
         }
         default:
@@ -314,6 +323,21 @@ std::shared_ptr<Node> operator+(std::shared_ptr<Node> a, std::shared_ptr<Node> b
         )
     );
     return addPtr;
+}
+
+std::shared_ptr<Node> operator-(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
+{
+    assert(a->data.rows() == b->data.rows());
+    assert(a->data.cols() == b->data.cols());
+    std::shared_ptr<Node> subPtr(
+        std::make_shared<Node>(
+            a->data - b->data, 
+            false, 
+            std::vector<std::shared_ptr<Node>> {a, b}, 
+            Deep::gradFn::subtractBackward
+        )
+    );
+    return subPtr;
 }
 
 /* Standalone ReLU */
