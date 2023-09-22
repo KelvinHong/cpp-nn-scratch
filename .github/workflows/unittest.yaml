@@ -2,14 +2,15 @@ name: Unittest for CPP neural network implementations.
 
 on:
     push:
-        branches: [ main ]
+        branches: 
+            - main
 
 jobs:
     build-and-test:
         runs-on: ubuntu-latest
         steps:
-        - uses: actions/checkout@v2
-        - name: Compile using Makefile 
-            run: make
-        - name: Run the test
-            run: ./autotest
+            - uses: actions/checkout@v2
+            - name: Compile using Makefile 
+                run: make
+            - name: Run the test
+                run: ./autotest
