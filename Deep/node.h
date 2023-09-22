@@ -41,11 +41,11 @@ class Node : public std::enable_shared_from_this<Node>
         void zeroGrad();
 
         /* Overload transpose */
-        std::unique_ptr<Node> transpose();
+        std::shared_ptr<Node> transpose();
         /* ReLU */
-        std::unique_ptr<Node> relu();
+        std::shared_ptr<Node> relu();
         /* Sum */
-        std::unique_ptr<Node> sum();
+        std::shared_ptr<Node> sum();
         
 
         /* Backward */

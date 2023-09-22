@@ -72,11 +72,11 @@ void Node::zeroGrad()
 }
 
 /* Overloading operators */
-std::unique_ptr<Node> Node::transpose()
+std::shared_ptr<Node> Node::transpose()
 {
-    std::unique_ptr<Node> nodePtr(
-        std::make_unique<Node>(
-            shared_from_this() -> data.transpose(),
+    std::shared_ptr<Node> nodePtr(
+        std::make_shared<Node>(
+            this -> data.transpose(),
             false,
             std::vector<std::shared_ptr<Node>> {shared_from_this()},
             gradFn::transposeBackward
@@ -86,14 +86,14 @@ std::unique_ptr<Node> Node::transpose()
     return nodePtr;
 }
 
-std::unique_ptr<Node> Node::relu()
+std::shared_ptr<Node> Node::relu()
 {
     Eigen::MatrixXd x { this->data };
     x = x.unaryExpr([](double num){
         return (num>0) ? num : 0.0;
     });
-    std::unique_ptr<Node> nodePtr(
-        std::make_unique<Node>(
+    std::shared_ptr<Node> nodePtr(
+        std::make_shared<Node>(
             x,
             false,
             std::vector<std::shared_ptr<Node>> {shared_from_this()},
@@ -103,12 +103,12 @@ std::unique_ptr<Node> Node::relu()
     return nodePtr;
 }
 
-std::unique_ptr<Node> Node::sum()
+std::shared_ptr<Node> Node::sum()
 {
     Eigen::MatrixXd summation(1,1);
-    summation << shared_from_this() -> data.sum();
-    std::unique_ptr<Node> nodePtr(
-        std::make_unique<Node>(
+    summation << this -> data.sum();
+    std::shared_ptr<Node> nodePtr(
+        std::make_shared<Node>(
             summation,
             false,
             std::vector<std::shared_ptr<Node>> {shared_from_this()},
