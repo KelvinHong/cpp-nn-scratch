@@ -55,7 +55,7 @@ class Node : public std::enable_shared_from_this<Node>
         /* Backward */
         /* Backward for intermediate nodes. */
         void backward(T fromGradient);
-        /* Backward for Loss, use a double,. non-unit gradient. */
+        /* Backward for Loss, use a double, non-unit gradient. */
         void backward(double fromGradient);
         /* Backward for Loss, they typically uses default gradient of 1. */
         void backward();

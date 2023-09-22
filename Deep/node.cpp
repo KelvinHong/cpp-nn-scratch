@@ -114,23 +114,6 @@ std::shared_ptr<Node> Node::relu()
     return nodePtr;
 }
 
-/* Standalone ReLU */
-std::shared_ptr<Node> relu(std::shared_ptr<Node> a)
-{
-    Eigen::MatrixXd x { a->data };
-    x = x.unaryExpr([](double num){
-        return (num>0) ? num : 0.0;
-    });
-    std::shared_ptr<Node> nodePtr(
-        std::make_shared<Node>(
-            x,
-            false,
-            std::vector<std::shared_ptr<Node>> {a},
-            gradFn::reluBackward
-        )
-    );
-    return nodePtr;
-}
 
 std::shared_ptr<Node> Node::sum()
 {
@@ -147,20 +130,6 @@ std::shared_ptr<Node> Node::sum()
     return nodePtr;
 }
 
-std::shared_ptr<Node> sum(std::shared_ptr<Node> a)
-{
-    Eigen::MatrixXd summation(1,1);
-    summation << a -> data.sum();
-    std::shared_ptr<Node> nodePtr(
-        std::make_shared<Node>(
-            summation,
-            false,
-            std::vector<std::shared_ptr<Node>> {a},
-            gradFn::sumBackward
-        )
-    );
-    return nodePtr;
-}
 
 void Node::backward(T fromGradient)
 {
@@ -256,35 +225,6 @@ void Node::backward()
     this->backward(1.0);
 }
 
-std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
-{
-    assert(a->data.cols() == b->data.rows());
-    std::shared_ptr<Node> matmulPtr(
-        std::make_shared<Node>(
-            a->data * b->data, 
-            false, 
-            std::vector<std::shared_ptr<Node>> {a, b}, 
-            Deep::gradFn::matMulBackward
-        )
-    );
-    
-    return matmulPtr;
-}
-
-std::shared_ptr<Node> operator+(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
-{
-    assert(a->data.rows() == b->data.rows());
-    assert(a->data.cols() == b->data.cols());
-    std::shared_ptr<Node> addPtr(
-        std::make_shared<Node>(
-            a->data + b->data, 
-            false, 
-            std::vector<std::shared_ptr<Node>> {a, b}, 
-            Deep::gradFn::addBackward
-        )
-    );
-    return addPtr;
-}
 
 std::ostream& operator<< (std::ostream &out, const std::shared_ptr<Node>& node)
 {
@@ -343,6 +283,47 @@ int Node::descendents(int level, bool verbose)
 int Node::descendents(bool verbose)
 {
     return Node::descendents(0, verbose);
+}
+
+
+std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
+{
+    assert(a->data.cols() == b->data.rows());
+    std::shared_ptr<Node> matmulPtr(
+        std::make_shared<Node>(
+            a->data * b->data, 
+            false, 
+            std::vector<std::shared_ptr<Node>> {a, b}, 
+            Deep::gradFn::matMulBackward
+        )
+    );
+    
+    return matmulPtr;
+}
+
+std::shared_ptr<Node> operator+(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
+{
+    assert(a->data.rows() == b->data.rows());
+    assert(a->data.cols() == b->data.cols());
+    std::shared_ptr<Node> addPtr(
+        std::make_shared<Node>(
+            a->data + b->data, 
+            false, 
+            std::vector<std::shared_ptr<Node>> {a, b}, 
+            Deep::gradFn::addBackward
+        )
+    );
+    return addPtr;
+}
+
+/* Standalone ReLU */
+std::shared_ptr<Node> relu(std::shared_ptr<Node> a)
+{
+    return a->relu();
+}
+std::shared_ptr<Node> sum(std::shared_ptr<Node> a)
+{
+    return a->sum();
 }
 
 std::shared_ptr<Node> affine(std::shared_ptr<Node> b, std::shared_ptr<Node> x, std::shared_ptr<Node> W)
