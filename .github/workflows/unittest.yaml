@@ -14,7 +14,7 @@ jobs:
         - name: Install Eigen
           run: |
             wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz -O ./include/tempEigen.tar.gz
-            tar -xvf ./include/tempEigen.tar.gz
+            tar -xvf ./include/tempEigen.tar.gz -C ./include/
             mkdir ./include/Eigen/
             mv ./include/eigen-3.4.0/Eigen/* ./include/Eigen/
         - name: Compile using Makefile 
