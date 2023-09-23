@@ -6,11 +6,13 @@ TARGET = autotest
 
 all: $(TARGET)
 
-$(TARGET): unittest.o Deep/node.o Deep/nn.o
-	$(CXX) $(CXXFLAGS) -o $(TARGET) unittest.o Deep/node.o Deep/nn.o
+$(TARGET): unittest.o Deep/node.o Deep/nn.o Deep/utility.o
+	$(CXX) $(CXXFLAGS) -o $(TARGET) unittest.o Deep/node.o Deep/nn.o Deep/utility.o
 
 unittest.o: unittest.cpp $(wildcard Deep/*.h)
 	$(CXX) $(CXXFLAGS) -c unittest.cpp
+
+Deep/utility.o: Deep/utility.h Deep/node.h
 
 Deep/node.o: Deep/node.h
 
