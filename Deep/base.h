@@ -12,18 +12,6 @@ anticipate its usage in many different codes, such as
 nn.cpp, cnn.cpp, rnn.cpp, and so on.*/
 class Layer {};
 
-/* BatchNorm Layer (1D) */ 
-// class BatchNorm1D: public Layer
-// {
-//     private: 
-//         bool useBias;
-//         bool requiresGrad;
-//         int in_c;
-//         int out_c;
-//     public:
-//         NSP weights;
-//         NSP biases;
-// };
 }
 
 #endif
