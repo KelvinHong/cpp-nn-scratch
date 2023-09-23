@@ -1,6 +1,6 @@
 # Compiler and compiler flags
 CXX := g++
-CXXFLAGS := -std=c++11 -Wall -Weffc++ -Wextra -Wconversion -Wshadow -I.
+CXXFLAGS := -std=c++11 -Wall -Weffc++ -Wextra -Wconversion -Wshadow -I. -I./include/
 
 TARGET = autotest
 
