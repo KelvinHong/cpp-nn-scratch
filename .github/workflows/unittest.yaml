@@ -16,7 +16,7 @@ jobs:
             wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz -O ./include/tempEigen.tar.gz
             tar -xvf ./include/tempEigen.tar.gz -C ./include/
             mkdir ./include/Eigen/
-            mv -r ./include/eigen-3.4.0/Eigen/* ./include/Eigen/
+            mv ./include/eigen-3.4.0/Eigen/* ./include/Eigen/
             rm ./include/tempEigen.tar.gz
             rm -r ./include/eigen-3.4.0/*
         - name: Compile using Makefile 
