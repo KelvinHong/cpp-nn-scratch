@@ -49,7 +49,11 @@ std::shared_ptr<Node> operator-(std::shared_ptr<Node> a, std::shared_ptr<Node> b
     return subPtr;
 }
 
-/* Standalone ReLU */
+std::shared_ptr<Node> transpose(std::shared_ptr<Node> a)
+{
+    return a->transpose();
+}
+
 std::shared_ptr<Node> relu(std::shared_ptr<Node> a)
 {
     return a->relu();

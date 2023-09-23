@@ -158,7 +158,7 @@ int testNode()
                 -> relu()
             ) * 
             (
-                w2Ptr -> transpose()
+                transpose(w2Ptr)
             )
         ) -> sum()
     };

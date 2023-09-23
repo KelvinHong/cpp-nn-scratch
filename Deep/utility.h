@@ -8,13 +8,14 @@
 
 namespace Deep
 {
-
 /* Overload Matrix Multiplication */
 std::shared_ptr<Node> operator*(std::shared_ptr<Node> a, std::shared_ptr<Node> b);
 /* Overload Matrix Addition */
 std::shared_ptr<Node> operator+(std::shared_ptr<Node> a, std::shared_ptr<Node> b);
 /* Overload Matrix Subtraction */
 std::shared_ptr<Node> operator-(std::shared_ptr<Node> a, std::shared_ptr<Node> b);
+/* Overload Transpose */  
+std::shared_ptr<Node> transpose(std::shared_ptr<Node> a);
 /* Overload ReLU */
 std::shared_ptr<Node> relu(std::shared_ptr<Node> a);
 /* Overload Sum */
