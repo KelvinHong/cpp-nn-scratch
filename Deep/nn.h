@@ -2,6 +2,7 @@
 #define NN_H
 #include "base.h"
 #include "node.h"
+#include "utility.h"
 #include <Eigen/Dense>
 #include <random>
 

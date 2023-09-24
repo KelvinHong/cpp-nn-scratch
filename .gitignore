@@ -1,3 +1,10 @@
+__pycache__
+models/*
+
+# Eigen package
+include/*
+!include/.gitignore
+
 # VSCode settings
 .vscode/*
 

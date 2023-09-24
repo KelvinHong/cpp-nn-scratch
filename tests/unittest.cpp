@@ -1,4 +1,5 @@
 #include "Deep/node.h"
+#include "Deep/utility.h"
 #include "Deep/nn.h"
 #include <iostream>
 #include <Eigen/Dense>
@@ -157,7 +158,7 @@ int testNode()
                 -> relu()
             ) * 
             (
-                w2Ptr -> transpose()
+                transpose(w2Ptr)
             )
         ) -> sum()
     };
