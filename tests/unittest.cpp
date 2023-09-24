@@ -204,7 +204,7 @@ int testFC()
     Eigen::MatrixXd in(4, 3);
     in << 1,2,3,4,5,6,7,8,9,10,11,12;
     NSP inPtr {std::make_shared<Deep::Node>(in)};
-    NSP outPtr { fcLayer(inPtr) };
+    NSP outPtr { fcLayer.forward(inPtr) };
 
     Eigen::MatrixXd endGradient(4, 5);
     endGradient << 1, 0.5, 0.5, 1, 1,
@@ -233,7 +233,7 @@ int testFC()
     Eigen::MatrixXd in(4, 3);
     in << 1,2,3,4,5,6,7,8,9,10,11,12;
     NSP inPtr {std::make_shared<Deep::Node>(in)};
-    NSP outPtr { fcLayer(inPtr) };
+    NSP outPtr { fcLayer.forward(inPtr) };
 
     Eigen::MatrixXd endGradient(4, 5);
     endGradient << 1, 0.5, 0.5, 1, 1,
@@ -274,7 +274,7 @@ int testFC()
     Deep::FullyConnected fc2(5, 2);
     NSP LPtr {
         Deep::sum(
-            fc2(Deep::relu(fc1(xPtr)))
+            fc2.forward(Deep::relu(fc1.forward(xPtr)))
         )
     };
     assert(LPtr->descendents() == 11);

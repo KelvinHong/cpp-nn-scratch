@@ -21,6 +21,7 @@ class Layer
 {
     public:
         virtual std::vector<NSP> params();
+        virtual NSP forward(NSP in);
         virtual ~Layer() = default;
 };
 
@@ -30,10 +31,11 @@ that consists of multiple layers. */
 class Model 
 {
     public:
-        std::unordered_map<std::string, Layer> layers;
+        std::unordered_map<std::string, std::unique_ptr<Layer>> layers;
         Model();
         std::vector<NSP> parameters();
-
+        virtual NSP forward(NSP in);
+        virtual ~Model() = default;
 };
 
 }

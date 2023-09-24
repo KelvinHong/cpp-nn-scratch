@@ -30,7 +30,7 @@ class FullyConnected: public Layer
         then initialize weights */ 
         FullyConnected(int in_channel, int out_channel, bool use_bias = true, bool requires_grad = true);
         /* Batched Forward call (overload) */
-        NSP operator()(NSP in); 
+        NSP forward(NSP in); 
         /* Get pointers to the weights */
         std::vector<NSP> params() override;
 };

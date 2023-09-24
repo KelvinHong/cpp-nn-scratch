@@ -40,7 +40,7 @@ Deep::FullyConnected::FullyConnected(int in_channel, int out_channel, bool use_b
 
 
 
-NSP Deep::FullyConnected::operator()(NSP in)
+NSP Deep::FullyConnected::forward(NSP in)
 {
     /*This is the batched forward function of linear layer, mimicking 
     PyTorch's Layer.__call__() signature, we overload the 

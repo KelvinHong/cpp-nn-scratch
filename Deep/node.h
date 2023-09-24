@@ -19,6 +19,7 @@ enum gradFn {
     addBackward,
     addMmBackward,
     subtractBackward,
+    mseBackward,
 };
 
 class Node : public std::enable_shared_from_this<Node>

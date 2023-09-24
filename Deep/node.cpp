@@ -42,6 +42,9 @@ std::ostream& operator<<(std::ostream& out, const gradFn gf){
         case subtractBackward:
             out << "subtractBackward";
             break;
+        case mseBackward:
+            out << "mseBackward";
+            break;
         default:
             throw std::invalid_argument("This case has not been recorded yet.");
 

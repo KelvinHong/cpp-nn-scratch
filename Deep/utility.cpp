@@ -81,4 +81,23 @@ std::shared_ptr<Node> affine(std::shared_ptr<Node> b, std::shared_ptr<Node> x, s
     return retPtr;
 }
 
+std::shared_ptr<Node> MSE(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
+{
+    assert(a->data.rows() == b->data.rows());
+    assert(a->data.cols() == b->data.cols());
+    Eigen::MatrixXd diffSquare { a->data - b->data };
+    diffSquare = diffSquare.unaryExpr([](double num){
+        return num * num;
+    });
+    Eigen::MatrixXd result(1,1);
+    result << diffSquare.mean();
+    std::shared_ptr<Node> retPtr {std::make_shared<Node>(
+        result,
+        false,
+        std::vector<std::shared_ptr<Node>> {a,b},
+        Deep::gradFn::mseBackward
+    )};
+    return retPtr;
+}
+
 }
