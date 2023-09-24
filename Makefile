@@ -18,4 +18,4 @@ Deep/nn.o: Deep/nn.h Deep/base.h
 
 .PHONY: clean
 clean:
-	rm Deep/*.o *.o *.exe
+	rm Deep/*.o *.o *.exe $(TARGET)
