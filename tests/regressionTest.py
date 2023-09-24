@@ -13,15 +13,17 @@ class MyReg(torch.nn.Module):
     def __init__(self):
         super().__init__()
         self.fc1 = torch.nn.Linear(11, 64)
-        self.fc2 = torch.nn.Linear(64, 32)
-        self.fc3 = torch.nn.Linear(32, 1)
+        self.fc2 = torch.nn.Linear(64, 64)
+        self.fc3 = torch.nn.Linear(64, 32)
+        self.fc4 = torch.nn.Linear(32, 1)
     
     def forward(self, x: torch.Tensor):
         # Expect x has shape [B, 11]
         
         x1 = torch.nn.functional.relu(self.fc1(x))
         x2 = torch.nn.functional.relu(self.fc2(x1))
-        y = self.fc3(x2)
+        x3 = torch.nn.functional.relu(self.fc3(x2))
+        y = self.fc4(x3)
 
         return y # Shape [B, 1]
 
@@ -90,6 +92,7 @@ def train(train_path: str):
     print(myDL)
     # Build model and config
     model = MyReg()
+    model.train()
     epochs = 1000
     lr = 5e-5
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
@@ -117,7 +120,34 @@ def train(train_path: str):
     torch.save(model.state_dict(), "./models/python-model.pth")
 
 def test(test_path: str):
-    pass
+    model = MyReg()
+    model.load_state_dict(torch.load("./models/python-model.pth"))
+    model.eval()
+
+    t_features, t_labels = csv_to_tensor(test_path)
+    myDataset = MyDataset(t_features, t_labels)
+    myDL = DataLoader(myDataset,batch_size=64,shuffle=False)
+    # test model
+    N = 0
+    correct = 0
+    total_loss = 0.
+    with torch.no_grad():
+        for i, data in enumerate(myDL):
+            inputs, labels = data # [B, 11], [B]
+            labels = labels.int()
+            B = labels.shape[0] # get batch size
+            N += B
+            outputs: torch.Tensor = model(inputs) # [B, 1]
+            int_outputs: torch.Tensor = torch.squeeze(outputs, dim=1).round().int()
+            correct += (int_outputs == labels).sum().item()
+            # MSE
+            loss = torch.sum((torch.squeeze(outputs, dim=1) - labels) ** 2)
+            total_loss += loss.item()
+            loss /= B
+
+    accuracy = 100 * (correct / N)
+    avg_loss = total_loss / N
+    print(f"Accuracy is {accuracy:.2f}%, loss is {avg_loss:.6f}.")
 
 if __name__ == "__main__":
     os.makedirs("./models/", exist_ok=True)
