@@ -222,8 +222,8 @@ int testFC()
     assert(outPtr->nextNodes[1]->nextNodes[0]->gradient == expectGradient);
 
     // Use layer's parameters, no bias layer should only have one element.
-    assert(fcLayer.parameters().size() == 1);
-    NSP wPtr { fcLayer.parameters()[0] };
+    assert(fcLayer.params().size() == 1);
+    NSP wPtr { fcLayer.params()[0] };
     assert(wPtr->gradient.isApprox(expectGradient, 1e-6));
     }
 
@@ -254,7 +254,7 @@ int testFC()
     assert(outPtr->nextNodes[2]->nextNodes[0]->gradient == expectWeightGradient);
 
     // Use layer's parameters, no bias layer should only have one element.
-    std::vector<NSP> wbList { fcLayer.parameters() };
+    std::vector<NSP> wbList { fcLayer.params() };
     assert(wbList.size() == 2);
     NSP wPtr { wbList[0] };
     NSP bPtr { wbList[1] };

@@ -32,7 +32,7 @@ class FullyConnected: public Layer
         /* Batched Forward call (overload) */
         NSP operator()(NSP in); 
         /* Get pointers to the weights */
-        std::vector<NSP> parameters();
+        std::vector<NSP> params() override;
 };
 }
 

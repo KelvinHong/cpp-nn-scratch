@@ -3,20 +3,29 @@ CXX := g++
 CXXFLAGS := -std=c++11 -Wall -Weffc++ -Wextra -Wconversion -Wshadow -I. -I./include/
 
 TARGET = autotest
+MODEL1 = firstModel
 
-all: $(TARGET)
+all: $(TARGET) $(MODEL1)
 
-$(TARGET): tests/unittest.o Deep/node.o Deep/nn.o Deep/utility.o
-	$(CXX) $(CXXFLAGS) -o $(TARGET) tests/unittest.o Deep/node.o Deep/nn.o Deep/utility.o
+$(MODEL1): tests/regressionTest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
+	$(CXX) $(CXXFLAGS) -o $(MODEL1) tests/regressionTest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
+
+$(TARGET): tests/unittest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
+	$(CXX) $(CXXFLAGS) -o $(TARGET) tests/unittest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
+
+tests/regressionTest.o: tests/regressionTest.cpp $(wildcard Deep/*.h)
+	$(CXX) $(CXXFLAGS) -c tests/regressionTest.cpp -o $@
 
 tests/unittest.o: tests/unittest.cpp $(wildcard Deep/*.h)
 	$(CXX) $(CXXFLAGS) -c tests/unittest.cpp -o $@
 
 Deep/utility.o: Deep/utility.h Deep/node.h
 
-Deep/node.o: Deep/node.h
-
 Deep/nn.o: Deep/nn.h Deep/base.h
+
+Deep/base.o: Deep/base.h Deep/node.h
+
+Deep/node.o: Deep/node.h
 
 .PHONY: clean
 clean:

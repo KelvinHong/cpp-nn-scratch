@@ -1,5 +1,12 @@
 #ifndef BASE_H
 #define BASE_H
+#include "node.h"
+#include <vector>
+#include <unordered_map>
+#include <memory>
+
+// Node Shared Pointer
+using NSP = std::shared_ptr<Deep::Node>;
 
 namespace Deep
 {
@@ -10,8 +17,26 @@ but MaxPooling should not be.
 We do not put this in a single header file because we 
 anticipate its usage in many different codes, such as 
 nn.cpp, cnn.cpp, rnn.cpp, and so on.*/
-class Layer {};
+class Layer 
+{
+    public:
+        virtual std::vector<NSP> params();
+        virtual ~Layer() = default;
+};
+
+
+/* This is the base class for model
+that consists of multiple layers. */
+class Model 
+{
+    public:
+        std::unordered_map<std::string, Layer> layers;
+        Model();
+        std::vector<NSP> parameters();
+
+};
 
 }
+
 
 #endif

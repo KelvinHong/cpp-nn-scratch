@@ -64,7 +64,7 @@ NSP Deep::FullyConnected::operator()(NSP in)
     return out;
 }
 
-std::vector<NSP> Deep::FullyConnected::parameters()
+std::vector<NSP> Deep::FullyConnected::params()
 {
     std::vector<NSP> ret {weights};
     if (useBias) ret.push_back(biases);
