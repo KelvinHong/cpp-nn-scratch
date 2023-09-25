@@ -10,7 +10,7 @@ jobs:
         runs-on: ubuntu-latest
         steps:
         - name: Checkout 
-          uses: actions/checkout@v2
+          uses: actions/checkout@v4
         - name: Install Eigen
           run: |
             wget https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz -O ./include/tempEigen.tar.gz
