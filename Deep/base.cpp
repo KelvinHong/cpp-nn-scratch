@@ -21,13 +21,46 @@ Deep::Model::Model(): layers(std::unordered_map<std::string, std::unique_ptr<Lay
 
 }
 
-std::vector<NSP> Deep::Model::parameters()
+std::vector<std::pair<std::string, NSP>> Deep::Model::namedParameters()
 {
-    std::vector<NSP> ret {};
+    std::vector<std::pair<std::string, NSP>> ret {};
     for (auto it=layers.begin(); it!=layers.end(); ++it)
     {
         std::vector<NSP> pars { (*it).second->params() };
-        ret.insert(ret.end(),pars.begin(),pars.end());
+        std::string layerName { (*it).first };
+        for (int paramNum = 1; paramNum <= static_cast<int>(pars.size()); paramNum++)
+        {
+            ret.push_back(std::pair<std::string, NSP> {
+                layerName + '.' + std::to_string(paramNum), 
+                pars[paramNum-1]
+            });
+        }
+    }
+    return ret;
+}
+
+void Deep::Model::showParametersInfo()
+{
+    std::cout << "Printing Model Parameters Information:\n";
+    std::vector<std::pair<std::string, NSP>> fullParams {namedParameters()};
+    int paramsCount { 0 };
+    for (auto it=fullParams.begin(); it!=fullParams.end(); ++it)
+    {
+        std::cout << (*it).first << ": Data shape (" 
+                << (*it).second->data.rows() << ", "
+                << (*it).second->data.cols() << ");\n";
+        paramsCount += static_cast<int>((*it).second->data.size());
+    }
+    std::cout << "Total: " << paramsCount << " parameters.\n";
+}
+
+std::vector<NSP> Deep::Model::parameters()
+{
+    std::vector<std::pair<std::string, NSP>> fullParams {namedParameters()};
+    std::vector<NSP> ret {};
+    for (auto it=fullParams.begin(); it!=fullParams.end(); ++it)
+    {
+        ret.push_back((*it).second);
     }
     return ret;
 }

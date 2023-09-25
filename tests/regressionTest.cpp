@@ -48,7 +48,7 @@ int main()
     NSP LPtr {Deep::MSE(yPtr, labelPtr)};
     int count { LPtr->descendents() };
     std::cout << "This tree has " << count << " nodes.\n";
-
+    model.showParametersInfo();
 
     return 0;
 }
