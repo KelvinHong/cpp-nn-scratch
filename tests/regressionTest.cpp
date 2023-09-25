@@ -40,10 +40,15 @@ int main()
     data.row(0).fill(0.5);
     data.row(1).fill(-0.5);
     data.row(2).fill(1.0);
-    NSP xPtr(std::make_shared<Deep::Node>(data));
+    Eigen::MatrixXd label(3, 1);
+    label << 5, 8, 4;
+    NSP labelPtr { std::make_shared<Deep::Node>(label) }; // No gradient required for label.
+    NSP xPtr { std::make_shared<Deep::Node>(data, Deep::gradFn::accumulateGrad) };
     NSP yPtr {model.forward(xPtr)};
-    std::cout << yPtr->data << '\n';
-    
+    NSP LPtr {Deep::MSE(yPtr, labelPtr)};
+    int count { LPtr->descendents() };
+    std::cout << "This tree has " << count << " nodes.\n";
+
 
     return 0;
 }

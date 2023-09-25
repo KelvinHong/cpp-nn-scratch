@@ -13,44 +13,7 @@ namespace Deep
 hopefully I can find a more elegant way if this
 project become bigger :) */
 std::ostream& operator<<(std::ostream& out, const gradFn gf){
-    switch(gf)
-    {
-        case none: 
-            out << "none";
-            break;
-        case accumulateGrad: 
-            out << "accumulateGrad";
-            break;
-        case transposeBackward: 
-            out << "transposeBackward";
-            break;
-        case matMulBackward: 
-            out << "matMulBackward";
-            break;
-        case reluBackward: 
-            out << "reluBackward";
-            break;
-        case sumBackward: 
-            out << "sumBackward";
-            break;
-        case addBackward: 
-            out << "addBackward";
-            break;
-        case addMmBackward:
-            out << "addMmBackward";
-            break;
-        case subtractBackward:
-            out << "subtractBackward";
-            break;
-        case mseBackward:
-            out << "mseBackward";
-            break;
-        default:
-            throw std::invalid_argument("This case has not been recorded yet.");
-
-    }
-    
-    
+    out << ToString(gf);  
     return out;
 }
 
@@ -83,6 +46,11 @@ Node::Node(T x, gradFn gradfn):
 std::vector<int> Node::shape()
 {
     return std::vector<int> { static_cast<int>(data.rows()), static_cast<int>(data.cols()) };
+}
+
+int Node::size()
+{
+    return static_cast<int>(data.size());
 }
 
 void Node::zeroGrad()
@@ -211,6 +179,17 @@ void Node::backward(T fromGradient)
         {
             this->nextNodes[0]->backward(fromGradient);
             this->nextNodes[1]->backward(-fromGradient);
+            break;
+        }
+        case gradFn::mseBackward:
+        {
+            const int N { this->nextNodes[0]->size() };
+            /* Gradient for the left Node */
+            T leftGradient { (2.0/N) * (this->nextNodes[0]->data - this->nextNodes[1]->data) };
+            leftGradient = fromGradient(0,0) * leftGradient;
+            /* For MSE, rightGradient is the negative of leftGradient. */            
+            this->nextNodes[0]->backward(leftGradient);
+            this->nextNodes[1]->backward(-leftGradient);
             break;
         }
         default:

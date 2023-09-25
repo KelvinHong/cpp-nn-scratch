@@ -12,6 +12,16 @@ using NSP = std::shared_ptr<Deep::Node>;
 
 int testNode()
 {
+    // Test Node size 
+    {
+    Eigen::MatrixXd dummy(5,7);
+    dummy.fill(0.5);
+    NSP dummyPtr {std::make_shared<Deep::Node>(dummy)};
+    std::vector<int> theShape {dummyPtr->shape()};
+    assert(theShape[0] == 5);
+    assert(theShape[1] == 7);
+    assert(dummyPtr->size() == 35);
+    }
     // Test transpose backward
     {
     Eigen::MatrixXd weights(2,3);
@@ -127,6 +137,26 @@ int testNode()
     Eigen::MatrixXd trueGrad2(3,4);
     trueGrad2.fill(10.5);
     assert( yPtr->gradient.isApprox(trueGrad2, 1e-6) );
+    }
+
+    /* Test MSE */
+    {
+    Eigen::MatrixXd y1(2,3);
+    y1 << 0, 1, 0, 
+        -1, 2, 1;
+    Eigen::MatrixXd y2(2,3);    
+    y2 << 1, 1, -1, 
+        -1, 2, 5;
+    NSP y1Ptr {std::make_shared<Deep::Node>(y1, Deep::gradFn::accumulateGrad)};
+    NSP y2Ptr {std::make_shared<Deep::Node>(y2, Deep::gradFn::accumulateGrad)};
+    NSP LPtr { Deep::MSE(y1Ptr, y2Ptr) };
+    LPtr->backward();
+    Eigen::MatrixXd trueLeft(2,3);
+    trueLeft << -1.0/3, 0.0, 1.0/3,
+                0.0, 0.0, -4.0/3;
+    assert(LPtr->descendents() == 3);
+    assert(y1Ptr->gradient.isApprox(trueLeft, 1e-6));
+    assert(y2Ptr->gradient.isApprox(-trueLeft, 1e-6));
     }
 
     /* Test composite functions */
