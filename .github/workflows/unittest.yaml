@@ -20,6 +20,7 @@ jobs:
             rm ./include/tempEigen.tar.gz
             rm -r ./include/eigen-3.4.0/*
         - name: Install Boost
+          run: |
             wget https://boostorg.jfrog.io/artifactory/main/release/1.83.0/source/boost_1_83_0.tar.gz -O ./include/tempBoost.tar.gz
             tar -xf ./include/tempBoost.tar.gz -C ./include/
             mkdir ./include/boost/
