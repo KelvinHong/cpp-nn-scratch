@@ -37,7 +37,9 @@ int main()
 {   
     MyReg model {};
     Eigen::MatrixXd data(3,11);
-    data.fill(0.5);
+    data.row(0).fill(0.5);
+    data.row(1).fill(-0.5);
+    data.row(2).fill(1.0);
     NSP xPtr(std::make_shared<Deep::Node>(data));
     NSP yPtr {model.forward(xPtr)};
     std::cout << yPtr->data << '\n';

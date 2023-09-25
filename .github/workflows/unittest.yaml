@@ -21,5 +21,7 @@ jobs:
             rm -r ./include/eigen-3.4.0/*
         - name: Compile using Makefile 
           run: make
-        - name: Run the test
-          run: ./autotest
+        - name: Run the tests
+          run: |
+            ./autotest
+            ./firstModel

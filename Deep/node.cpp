@@ -74,12 +74,16 @@ Node::Node(T x, bool isleaf, std::vector<std::shared_ptr<Node>> nextnodes, gradF
         throw std::invalid_argument(
             "A leaf node shouldn't have next nodes."
         );
-    }
-    
+    }  
 };
 
 Node::Node(T x, gradFn gradfn): 
     Node(x, true, std::vector<std::shared_ptr<Node>>{}, gradfn) {}
+
+std::vector<int> Node::shape()
+{
+    return std::vector<int> { static_cast<int>(data.rows()), static_cast<int>(data.cols()) };
+}
 
 void Node::zeroGrad()
 {

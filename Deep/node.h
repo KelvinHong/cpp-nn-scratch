@@ -41,6 +41,8 @@ class Node : public std::enable_shared_from_this<Node>
             gradFn gradfn = gradFn::none);
         /* Overloading constructor for convenience */
         Node(T x, gradFn gradfn);
+        /* Shape of the contained matrix */
+        std::vector<int> shape();
 
         /* Clear gradient */
         void zeroGrad();
@@ -61,9 +63,6 @@ class Node : public std::enable_shared_from_this<Node>
         /* Backward for Loss, they typically uses default gradient of 1. */
         void backward();
 
-        /* Custom destructor: Destruct self and every next nodes 
-        except accumulateGrad. */
-        // ~Node();
 
         /* Overload << */
         friend std::ostream& operator<< (std::ostream &out, const std::shared_ptr<Node>& nodePtr);
