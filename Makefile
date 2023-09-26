@@ -7,8 +7,8 @@ MODEL1 = firstModel
 
 all: $(TARGET) $(MODEL1)
 
-$(MODEL1): tests/regressionTest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
-	$(CXX) $(CXXFLAGS) -o $(MODEL1) tests/regressionTest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
+$(MODEL1): tests/regressionTest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o Deep/optimizer.o
+	$(CXX) $(CXXFLAGS) -o $(MODEL1) tests/regressionTest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o Deep/optimizer.o
 
 $(TARGET): tests/unittest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
 	$(CXX) $(CXXFLAGS) -o $(TARGET) tests/unittest.o Deep/node.o Deep/nn.o Deep/utility.o Deep/base.o
@@ -18,6 +18,8 @@ tests/regressionTest.o: tests/regressionTest.cpp $(wildcard Deep/*.h)
 
 tests/unittest.o: tests/unittest.cpp $(wildcard Deep/*.h)
 	$(CXX) $(CXXFLAGS) -c tests/unittest.cpp -o $@
+
+Deep/optimizer.o: Deep/optimizer.h Deep/base.h
 
 Deep/utility.o: Deep/utility.h Deep/node.h
 

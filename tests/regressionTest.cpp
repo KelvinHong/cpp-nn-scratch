@@ -2,6 +2,7 @@
 #include "../Deep/utility.h"
 #include "../Deep/base.h"
 #include "../Deep/nn.h"
+#include "../Deep/optimizer.h"
 #include <Eigen/Dense>
 #include <memory>
 
@@ -46,9 +47,13 @@ int main()
     NSP xPtr { std::make_shared<Deep::Node>(data, Deep::gradFn::accumulateGrad) };
     NSP yPtr {model.forward(xPtr)};
     NSP LPtr {Deep::MSE(yPtr, labelPtr)};
-    int count { LPtr->descendents() };
+    int count { LPtr->descendents(true) };
     std::cout << "This tree has " << count << " nodes.\n";
-    model.showParametersInfo();
+    Deep::Optim::SGD optimizer(model.namedParameters());
+    std::cout << "After initializing optimizers:\n";
+    LPtr->descendents(true);
+    
+    
 
     return 0;
 }
