@@ -18,4 +18,13 @@ Install C++ Boost Library (for enum to string capabilities).
 
 ## Demonstration
 
-(TODO)
+On Windows or Linux, run make:
+```
+make
+```
+
+to compile the executables. 
+
+Run `./autotest.exe` to verify all functionalities are good.
+
+Run `./firstModel.exe` to run model training on the Wine Quality Dataset (WIP).
