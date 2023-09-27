@@ -4,12 +4,14 @@
 #include <vector>
 #include <unordered_map>
 #include <memory>
+#include <random>
 
 // Node Shared Pointer
 using NSP = std::shared_ptr<Deep::Node>;
 
 namespace Deep
 {
+extern std::mt19937 gen;
 /* All layer types should inherited from Layer class. 
 Layer is the base class of all layers that have parameters.
 Ex: Fully Connected Layer should be derived from Layer,

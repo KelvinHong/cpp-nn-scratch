@@ -3,13 +3,11 @@
 #include "utility.h"
 #include "nn.h"
 #include <Eigen/Dense>
-#include <random>
 #include <iostream>
 #include <memory>
 #include <cassert>
+#include <random>
 
-// Using random_device is not stable, might have to change this later.
-std::mt19937 Deep::gen(std::random_device{}());
 
 Deep::FullyConnected::FullyConnected(int in_channel, int out_channel, bool use_bias, bool requires_grad):
     useBias(use_bias), requiresGrad(requires_grad), in_c(in_channel), out_c(out_channel),

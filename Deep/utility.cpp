@@ -100,4 +100,10 @@ std::shared_ptr<Node> MSE(std::shared_ptr<Node> a, std::shared_ptr<Node> b)
     return retPtr;
 }
 
+std::shared_ptr<Node> MSE(std::shared_ptr<Node> a, Eigen::MatrixXd b)
+{
+    std::shared_ptr<Node> bPtr {std::make_shared<Node>(b, Deep::gradFn::none)};
+    return MSE(a, bPtr);
+}
+
 }

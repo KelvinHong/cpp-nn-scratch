@@ -4,13 +4,11 @@
 #include "node.h"
 #include "utility.h"
 #include <Eigen/Dense>
-#include <random>
 
 // Node Shared Pointer
 using NSP = std::shared_ptr<Deep::Node>;
 namespace Deep
 {
-extern std::mt19937 gen;
 
 
 /* FullyConnected layer will not be using 

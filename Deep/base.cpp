@@ -1,10 +1,14 @@
 #include "base.h"
 #include "node.h"
 #include <vector>
+#include <random>
 #include <unordered_map>
 #include <memory>
 // Node Shared Pointer
 using NSP = std::shared_ptr<Deep::Node>;
+
+// Using random_device is not stable, might have to change this later.
+std::mt19937 Deep::gen(std::random_device{}());
 
 std::vector<NSP> Deep::Layer::params()
 {
