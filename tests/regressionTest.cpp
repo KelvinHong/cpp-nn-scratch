@@ -3,7 +3,6 @@
 #include "../Deep/base.h"
 #include "../Deep/nn.h"
 #include "../Deep/optimizer.h"
-#include "rapidcsv.h"
 #include <Eigen/Dense>
 #include <sstream>
 #include <fstream>
@@ -173,30 +172,37 @@ int testForward()
 
 int train(std::vector<Eigen::MatrixXd> dataset)
 {
-    int epochs { 50 };
-    
+    const int epochs { 50 };
+    const int bs { 64 };
+
     MyReg model {};
     Deep::Optim::SGD optimizer(model.namedParameters());
-    DataLoader1D dl(dataset, 64, true);
+    DataLoader1D dl(dataset, bs, true);
 
     for (int epoch = 1; epoch <= epochs; ++epoch)
     {
         std::cout << "Training on epoch " << epoch << "...\n";
-        double running_loss {0.0};
+        double runningLoss {0.0};
         while (dl.hasNext())
         {
-            /* TODO implement zeroGrad for optimizer. */
+            optimizer.zeroGrad();
+
             std::vector<Eigen::MatrixXd> thisBatch {dl.nextBatch()};
             Eigen::MatrixXd trainFeature { thisBatch[0] };
             Eigen::MatrixXd trainLabel { thisBatch[1] };
+            int currBatchSize {static_cast<int>(trainFeature.rows())};
             NSP trainNode { std::make_shared<Deep::Node>(trainFeature) };
             NSP yPtr { model.forward(trainNode) };
             NSP LPtr { Deep::MSE(yPtr, trainLabel) } ;
             LPtr->backward();
-
-
+            optimizer.step();
+            runningLoss += LPtr->data(0,0) * bs / currBatchSize ;
         }
+        double epochLoss {runningLoss / dl.length};
+        std::cout << "\tLoss is " << epochLoss << ".\n";
+        dl.reInitialize();
     }
+
     return 0;
 }
 

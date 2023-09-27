@@ -15,6 +15,14 @@ Optimizer::Optimizer(std::vector<std::pair<std::string, NSP>> namedParams):
 
 Optimizer::~Optimizer(){}
 
+void Optimizer::zeroGrad()
+{
+    for (std::pair<std::string, NSP> param: namedParameters)
+    {
+        param.second->zeroGrad();
+    }
+}
+
 void Optimizer::step()
 {
     throw std::invalid_argument("Please implement gradient step for your optimizer.");

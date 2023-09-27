@@ -17,6 +17,8 @@ class Optimizer
         std::vector<std::pair<std::string, NSP>> namedParameters;
         /* Constructor */
         Optimizer(std::vector<std::pair<std::string, NSP>> namedParams);
+        /* Zerograd, should be the same for every type of optimizer. */
+        void zeroGrad();
         /* Optimizer Step */
         virtual void step();
         virtual ~Optimizer();
