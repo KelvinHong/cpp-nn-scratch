@@ -1,4 +1,5 @@
 // Write your test on regression task here.
+#define NDEBUG
 #include "../Deep/utility.h"
 #include "../Deep/base.h"
 #include "../Deep/nn.h"
@@ -10,6 +11,7 @@
 #include <unordered_map>
 #include <numeric>
 #include <algorithm>
+#include <chrono>
 
 #define PTR_LAYER(DERIVED) std::unique_ptr<Deep::Layer>(new DERIVED)
 
@@ -169,7 +171,7 @@ int testForward()
     NSP xPtr { std::make_shared<Deep::Node>(data, Deep::gradFn::accumulateGrad) };
     NSP yPtr {model.forward(xPtr)};
     NSP LPtr {Deep::MSE(yPtr, labelPtr)};
-    int count { LPtr->descendents() };
+    [[maybe_unused]] int count { LPtr->descendents() };
     Deep::Optim::SGD optimizer(model.namedParameters());
     assert(count == 22);
 
@@ -177,17 +179,26 @@ int testForward()
     return 0;
 }
 
-void train(MyReg &model, std::vector<Eigen::MatrixXd> dataset)
+void train(MyReg &model, std::vector<Eigen::MatrixXd> dataset, std::unordered_map<std::string, std::string> trainArgs)
 {
-    const int epochs { 5 };
-    const int bs { 64 };
+    // Measure time
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
 
-    Deep::Optim::SGD optimizer(model.namedParameters(), 5e-5);
+    auto t1 = high_resolution_clock::now();
+
+    const int epochs { std::stoi(trainArgs["epochs"]) };
+    const int bs { std::stoi(trainArgs["bs"]) };
+    const double lr { std::stod(trainArgs["lr"]) };
+
+    Deep::Optim::SGD optimizer(model.namedParameters(), lr);
     DataLoader1D dl(dataset, bs, true);
 
     for (int epoch = 1; epoch <= epochs; ++epoch)
     {
-        std::cout << "Training on epoch " << epoch << "...\n";
+        std::cout << "Training on epoch " << epoch << ": ";
         double runningLoss {0.0};
         while (dl.hasNext())
         {
@@ -205,10 +216,25 @@ void train(MyReg &model, std::vector<Eigen::MatrixXd> dataset)
             runningLoss += LPtr->data(0,0) * currBatchSize ;
         }
         double epochLoss {runningLoss / dl.length};
-        std::cout << "\tLoss is " << epochLoss << ".\n";
+        std::cout << "Loss is " << epochLoss << ".\n";
         dl.reInitialize();
     }
+    
 
+    auto t2 = high_resolution_clock::now();
+
+    /* Getting number of milliseconds as an integer. */
+    auto ms_int = duration_cast<milliseconds>(t2 - t1);
+
+    /* Getting number of milliseconds as a double. */
+    duration<double, std::milli> ms_double = t2 - t1;
+
+    std::cout << ms_double.count()/(1000*epochs) << "s\n";
+    // Without optimization: get 0.582737s per epoch, one eighth performance of Python.
+    // O1: 0.0275281s
+    // O2: 0.0277896s
+    // O3: 0.0257724s
+    // Using any optimization makes C++ almost 3x faster than Python.
 }
 
 std::unordered_map<std::string, double> test(MyReg &model, std::vector<Eigen::MatrixXd> dataset)
@@ -239,15 +265,86 @@ std::unordered_map<std::string, double> test(MyReg &model, std::vector<Eigen::Ma
     return ret;
 }
 
+std::unordered_map<std::string, std::string> simpleParser(int argc, char **argv)
+{
+    std::vector<std::vector<std::string>> argPairs {};
+    for (int i=1; i<argc; ++i)
+    {
+        // Record double-hyphen argument
+        if (std::string(argv[i]).substr(0, 2) == "--")
+        {
+            argPairs.push_back({std::string(argv[i])});
+        }
+        else if (argv[i][0] == '-' && (i<argc-1))
+        {
+            argPairs.push_back({std::string(argv[i]), std::string(argv[i+1])});
+            ++i;
+        }
+        else
+        {
+            throw std::invalid_argument("Arguments are not valid. ");
+        }
+    }
+    // for (auto p: argPairs)
+    // {
+    //     std::cout << p[0] << ' ' ;
+    //     if (p.size() > 1)
+    //         std::cout << p[1] << ' ' ;
+    //     std::cout << '\n';
+    // }
+    std::unordered_map<std::string, std::string> ret {};
+    for (auto p: argPairs)
+    {
+        if (p.size() == 1)
+        {
+            // boolean flag
+            std::string flag { p[0] };
+            if (flag.length() >=5 && flag.substr(0,5) == "--no-")
+            {
+                ret[flag.substr(5)] = "false";
+            }
+            else
+            {
+                ret[flag.substr(2)] = "true";
+            }
+        }
+        else if (p.size() == 2) 
+        {   
+            // flag with value.
+            ret[p[0].substr(1)] = p[1];
+        }
+        else
+        {
+            throw std::invalid_argument("Parsing 3 or more arguments is not implemented yet.");
+        }
+    }
+    // Provide default arguments
+    if (ret.find("train") == ret.end())
+        ret["train"] = "true";
+    if (ret.find("epochs") == ret.end())
+        ret["epochs"] = "100";
+    if (ret.find("lr") == ret.end())
+        ret["lr"] = "0.00005";
+    if (ret.find("bs") == ret.end())
+        ret["bs"] = "64";
+    
+    return ret;
+}
 
-
-int main()
+int main(int argc, char **argv)
 {   
+    std::unordered_map<std::string, std::string> args {simpleParser(argc, argv)};
+    std::cout << "Accepted arguments as below:\n";
+    for (auto it=args.begin(); it!=args.end(); ++it)
+    {
+        std::cout << '\t' << (*it).first << ": " << (*it).second << '\n';
+    }
+
     testForward();
 
     MyReg model {};
     std::vector<Eigen::MatrixXd> dataset{loadData("./datasets/winequality/winequality-white-train.csv")};
-    train(model, dataset);
+    train(model, dataset, args);
     std::vector<Eigen::MatrixXd> testDataset{loadData("./datasets/winequality/winequality-white-test.csv")};
     std::unordered_map<std::string, double> result { test(model, testDataset) };
     std::cout << "Accuracy is " <<  result["accuracy"] << "%.\n";

@@ -1,6 +1,6 @@
 # Compiler and compiler flags
 CXX := g++
-CXXFLAGS := -std=c++11 -Wall -Weffc++ -Wextra -Wconversion -Wshadow -I. -I./include/
+CXXFLAGS := -std=c++11 -Wall -Weffc++ -Wextra -Wconversion -Wshadow -O3 -I. -I./include/ 
 
 TARGET = autotest
 MODEL1 = firstModel
@@ -31,4 +31,4 @@ Deep/node.o: Deep/node.h
 
 .PHONY: clean
 clean:
-	-rm Deep/*.o *.o *.exe tests/*.o $(TARGET)
+	-rm Deep/*.o Deep/*.h.gch *.o *.exe tests/*.o $(TARGET)

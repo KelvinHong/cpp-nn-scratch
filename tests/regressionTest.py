@@ -8,6 +8,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 import torch
 from torch.utils.data import Dataset, DataLoader
+import time
 
 class MyReg(torch.nn.Module):
     def __init__(self):
@@ -98,6 +99,7 @@ def train(train_path: str):
     optimizer = torch.optim.SGD(model.parameters(), lr=lr, momentum=0.9)
 
     # train model
+    currt = time.time()
     for epoch in range(epochs):
         if epoch % 10 == 9:
             print(f"Training epoch {epoch+1}...")
@@ -114,7 +116,10 @@ def train(train_path: str):
             running_loss += loss.item()
         running_loss /= (i+1)
         print(f"    epoch loss is {running_loss} .")
-            
+    used_time = time.time() - currt 
+    print(f"Average training time per epoch is {used_time/epochs:.4f}s.")
+    # Tested, each epoch takes about 0.0771s.
+    
 
     # save model
     torch.save(model.state_dict(), "./models/python-model.pth")
