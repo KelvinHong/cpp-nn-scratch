@@ -244,6 +244,7 @@ std::unordered_map<std::string, double> test(MyReg &model, std::vector<Eigen::Ma
 
     int total { 0 };
     int correct { 0 };
+    int correctOffOne { 0 };
     while (dl.hasNext())
     {
         std::vector<Eigen::MatrixXd> thisBatch {dl.nextBatch()};
@@ -259,9 +260,14 @@ std::unordered_map<std::string, double> test(MyReg &model, std::vector<Eigen::Ma
             ++total;
             if (num < 0.5)
                 ++correct;
+            if (num < 1.5)
+                ++correctOffOne;
         }
     }
-    std::unordered_map<std::string, double> ret {{"accuracy", 100.0 * static_cast<double>(correct)/total }};
+    std::unordered_map<std::string, double> ret {
+        {"accuracy", 100.0 * static_cast<double>(correct)/total },
+        {"accuracyOffOne", 100.0 * static_cast<double>(correctOffOne)/total }
+    };
     return ret;
 }
 
@@ -348,5 +354,6 @@ int main(int argc, char **argv)
     std::vector<Eigen::MatrixXd> testDataset{loadData("./datasets/winequality/winequality-white-test.csv")};
     std::unordered_map<std::string, double> result { test(model, testDataset) };
     std::cout << "Accuracy is " <<  result["accuracy"] << "%.\n";
+    std::cout << "Accuracy (Off By One) is " <<  result["accuracyOffOne"] << "%.\n";
     return 0;
 }
