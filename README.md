@@ -28,3 +28,11 @@ to compile the executables.
 Run `./autotest.exe` to verify all functionalities are good.
 
 Run `./firstModel.exe` to run model training on the Wine Quality Dataset (WIP).
+
+## TODO List
+
+Implement model saving and loading
+
+Implement visualization of backward graph.
+
+Implement Batchnorm.

@@ -31,4 +31,4 @@ Deep/node.o: Deep/node.h
 
 .PHONY: clean
 clean:
-	-rm Deep/*.o Deep/*.h.gch *.o *.exe tests/*.o $(TARGET)
+	-rm Deep/*.o Deep/*.h.gch *.o *.exe tests/*.o $(TARGET) $(MODEL1)

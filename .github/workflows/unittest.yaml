@@ -27,6 +27,10 @@ jobs:
             mv ./include/boost_1_83_0/boost/* ./include/boost/
             rm ./include/tempBoost.tar.gz
             rm -r ./include/boost_1_83_0/*
+        - name: Install Nlohmann JSON Utility
+          run: |
+            mkdir ./include/nlohmann/
+            wget "https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp" -O ./include/nlohmann/json.hpp
         - name: Compile using Makefile 
           run: make
         - name: Run the tests
