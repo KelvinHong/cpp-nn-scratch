@@ -1,13 +1,16 @@
 #ifndef BASE_H
 #define BASE_H
 #include "node.h"
+#include <nlohmann/json.hpp>
 #include <vector>
 #include <unordered_map>
 #include <memory>
 #include <random>
 
+using json = nlohmann::json;
 // Node Shared Pointer
 using NSP = std::shared_ptr<Deep::Node>;
+
 
 namespace Deep
 {

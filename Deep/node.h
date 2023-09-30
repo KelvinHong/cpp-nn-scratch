@@ -1,5 +1,6 @@
 #ifndef NODE_H
 #define NODE_H
+#include <nlohmann/json.hpp>
 #include <Eigen/Dense>
 #include <boost/preprocessor.hpp> // For enum to string.
 #include <vector>
@@ -30,6 +31,16 @@
 
 
 using T = Eigen::MatrixXd;
+using json = nlohmann::json;
+
+namespace nlohmann {
+    template <>
+    struct adl_serializer<T> {
+        static void to_json(json& j, const T& opt);
+        static void from_json(const json& j, T& opt);
+    };
+}
+
 namespace Deep
 {
 
@@ -101,15 +112,11 @@ class Node : public std::enable_shared_from_this<Node>
         int descendents(bool verbose);
 };
 
-// void to_json(json& j, const person& p) {
-//     j = json{{"name", p.name}, {"address", p.address}, {"age", p.age}};
-// }
+// /* Deserialization to JSON */
+// void to_json(json& j, const T& data);
 
-// void from_json(const json& j, person& p) {
-//     j.at("name").get_to(p.name);
-//     j.at("address").get_to(p.address);
-//     j.at("age").get_to(p.age);
-// }
+// /* Serialization from JSON */
+// void from_json(const json& j, T& data);
 
 }
 
