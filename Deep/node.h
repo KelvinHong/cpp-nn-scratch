@@ -33,6 +33,8 @@
 using T = Eigen::MatrixXd;
 using json = nlohmann::json;
 
+/* Supply methods for json serialization and 
+deserialization of Eigen Matrix. */
 namespace nlohmann {
     template <>
     struct adl_serializer<T> {

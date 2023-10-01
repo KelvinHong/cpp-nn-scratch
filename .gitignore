@@ -6,6 +6,7 @@ firstModel
 
 __pycache__
 models/*
+!models/.gitignore
 
 # Eigen package
 include/*

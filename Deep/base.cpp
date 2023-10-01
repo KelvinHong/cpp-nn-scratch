@@ -1,11 +1,19 @@
 #include "base.h"
 #include "node.h"
+#include <sys/stat.h>
 #include <vector>
 #include <random>
 #include <unordered_map>
 #include <memory>
+#include <fstream>
+#include <cassert>
 // Node Shared Pointer
 using NSP = std::shared_ptr<Deep::Node>;
+
+inline bool fileExist (const std::string& name) {
+    struct stat buffer;   
+    return (stat (name.c_str(), &buffer) == 0); 
+}
 
 namespace Deep
 {
@@ -73,6 +81,46 @@ std::vector<NSP> Model::parameters()
 
 void Model::saveStateDict(std::string modelPath)
 {
+    std::vector<std::pair<std::string, NSP>> NP {namedParameters()};
+    json modelStateDict {};
+    for (auto p: NP)
+    {
+        modelStateDict[p.first] = p.second->data;
+    }
+
+    std::ofstream file(modelPath);
+    file << modelStateDict;
+}
+
+void Model::loadStateDict(std::string modelPath)
+{
+    if (!fileExist(modelPath))
+    {
+        throw std::invalid_argument("The model path provided doesn't exist. ");
+    }
+    std::ifstream file(modelPath);
+    json object = json::parse(file);
+    // std::cout << object << '\n';
+
+    std::vector<std::pair<std::string, NSP>> NP {namedParameters()};
+    /* Using shared pointer feature, we load the eigen matrix into the named parameters. 
+    Throws an error if one of the model's key cannot be found from the json file. */
+    for (auto pair: NP)
+    {
+        if (!object.contains(pair.first))
+        {   
+            std::string message {"Error occurred during loading state dict into the model. Key not found from file: "};
+            message += pair.first;
+            throw std::invalid_argument(message);
+        }
+        // Load the Eigen Matrix into this
+        T toBeLoaded {object.at(pair.first).template get<T>()};
+        // Make sure two sides got the same shape
+        assert(pair.second->data.rows() == toBeLoaded.rows() );
+        assert(pair.second->data.cols() == toBeLoaded.cols() );
+        // Assign it
+        pair.second->data = toBeLoaded;
+    }
     
 }
 

@@ -1,6 +1,8 @@
 #include "Deep/node.h"
+#include "Deep/base.h"
 #include "Deep/utility.h"
 #include "Deep/nn.h"
+#include <nlohmann/json.hpp>
 #include <iostream>
 #include <Eigen/Dense>
 // #define NDEBUG
@@ -9,6 +11,29 @@
 
 // Node Shared Pointer
 using NSP = std::shared_ptr<Deep::Node>;
+
+// Toy model for testing utility.
+class MyReg: public Deep::Model
+{
+    public:
+        MyReg()
+        {
+            // Add layers
+            layers["fc1"] = std::unique_ptr<Deep::Layer>(new Deep::FullyConnected(5,3));
+            layers["fc2"] = std::unique_ptr<Deep::Layer>(new Deep::FullyConnected(3,2));
+            layers["fc3"] = std::unique_ptr<Deep::Layer>(new Deep::FullyConnected(2,10));
+            layers["fc4"] = std::unique_ptr<Deep::Layer>(new Deep::FullyConnected(10,1));
+        }
+        NSP forward(NSP in) override
+        {
+            // Forward pass
+            NSP x1 { Deep::relu(layers["fc1"]->forward(in)) };
+            NSP x2 { Deep::relu(layers["fc2"]->forward(x1)) };
+            NSP x3 { Deep::relu(layers["fc3"]->forward(x2)) };
+            NSP y { layers["fc4"]->forward(x3) };
+            return y;
+        }
+}; 
 
 int testNode()
 {
@@ -201,7 +226,6 @@ int testNode()
     assert(LPtr->nextNodes[0]->nextNodes[0]->gradientFunction == Deep::gradFn::reluBackward);
     
     LPtr->backward();
-    std::cout << "[Warning] Composite Backward not tested. Might cause issue.\n";
     }
 
     /* Test many-to-one relation
@@ -314,9 +338,27 @@ int testFC()
     return 0; // Everything works well.
 }
 
+int testModelUtility()
+{
+    // Test save and load
+    MyReg model {};
+    std::string modelPath {"./models/cpp-model.json"};
+    std::vector<NSP> prevWeights { model.layers["fc1"]->params() };
+    model.saveStateDict(modelPath);
+    MyReg copyModel {};
+    copyModel.loadStateDict(modelPath);
+    
+    std::vector<NSP> newWeights { copyModel.layers["fc1"]->params() };
+    assert(prevWeights[0]->data.isApprox(newWeights[0]->data, 1e-6));
+    std::cout << "Model Utilities unittest passed.\n";
+    return 0;
+}
+
 int testLayer()
 {
+    testModelUtility();
     testFC();
+
     std::cout << "All Layers derived classes unittests passed.\n\n";
     return 0;
 }

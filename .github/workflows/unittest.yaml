@@ -37,3 +37,5 @@ jobs:
           run: |
             ./autotest
             ./firstModel --train -epochs 10
+            ./firstModel --no-train
+            

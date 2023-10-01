@@ -7,21 +7,6 @@
 using T = Eigen::MatrixXd;
 
 
-// void to_json(json& j, const T& data) {
-//     T mat { data }; // Force data to be column major;
-//             std::vector<double> vecForm(mat.data(), mat.data() + mat.rows() * mat.cols());
-//             j = json{{"row", data.rows()}, {"array", vecForm}};
-// }
-
-// void from_json(const json& j, T& data) {
-//     // Will convert to column major matrix.
-//     int row {j["row"].template get<int>()};
-//     std::vector<double> numbers {j["array"].template get<std::vector<double>>()};
-//     int N {static_cast<int>(numbers.size())};
-//     int col { N / row};
-//     Eigen::Map<Eigen::MatrixXd> newData(numbers.data(), row, col);
-//     data = newData;
-// }
 
 namespace nlohmann {
     void adl_serializer<T>::to_json(json& j, const T& data)
@@ -40,25 +25,6 @@ namespace nlohmann {
         Eigen::Map<Eigen::MatrixXd> newData(numbers.data(), row, col);
         data = newData;
     }
-
-    // struct adl_serializer<T> {
-    //     static void to_json(json& j, const T& data)
-    //     {
-    //         T mat { data }; // Force data to be column major;
-    //         std::vector<double> vecForm(mat.data(), mat.data() + mat.rows() * mat.cols());
-    //         j = json{{"row", data.rows()}, {"array", vecForm}};
-    //     }
-    //     static void from_json(const json& j, T& data)
-    //     {
-    //         // Will convert to column major matrix.
-    //         int row {j["row"].template get<int>()};
-    //         std::vector<double> numbers {j["array"].template get<std::vector<double>>()};
-    //         int N {static_cast<int>(numbers.size())};
-    //         int col { N / row};
-    //         Eigen::Map<Eigen::MatrixXd> newData(numbers.data(), row, col);
-    //         data = newData;
-    //     }
-    // };
 }
 
 namespace Deep

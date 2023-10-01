@@ -11,6 +11,12 @@ using json = nlohmann::json;
 // Node Shared Pointer
 using NSP = std::shared_ptr<Deep::Node>;
 
+// Check file exist
+/* Taken from 
+https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exists-using-standard-c-c11-14-17-c 
+*/
+inline bool fileExist (const std::string& name);
+
 
 namespace Deep
 {

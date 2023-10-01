@@ -349,11 +349,22 @@ int main(int argc, char **argv)
     testForward();
 
     MyReg model {};
-    std::vector<Eigen::MatrixXd> dataset{loadData("./datasets/winequality/winequality-white-train.csv")};
-    train(model, dataset, args);
-    std::vector<Eigen::MatrixXd> testDataset{loadData("./datasets/winequality/winequality-white-test.csv")};
-    std::unordered_map<std::string, double> result { test(model, testDataset) };
-    std::cout << "Accuracy is " <<  result["accuracy"] << "%.\n";
-    std::cout << "Accuracy (Off By One) is " <<  result["accuracyOffOne"] << "%.\n";
+    std::string modelPath {"./models/cpp-model.json"};
+    if (args["train"] == "true")
+    {
+        std::vector<Eigen::MatrixXd> dataset{loadData("./datasets/winequality/winequality-white-train.csv")};
+        train(model, dataset, args);
+        model.saveStateDict(modelPath);
+    }
+    else
+    {
+        std::vector<Eigen::MatrixXd> testDataset{loadData("./datasets/winequality/winequality-white-test.csv")};
+        model.loadStateDict(modelPath);
+        std::unordered_map<std::string, double> result { test(model, testDataset) };
+        std::cout << "Accuracy is " <<  result["accuracy"] << "%.\n";
+        std::cout << "Accuracy (Off By One) is " <<  result["accuracyOffOne"] << "%.\n";
+    }
+    
+    
     return 0;
 }
