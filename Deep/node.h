@@ -112,6 +112,9 @@ class Node : public std::enable_shared_from_this<Node>
         return the total number of nodes */
         int descendents(int level = 0, bool verbose = false);
         int descendents(bool verbose);
+
+        /* Visualize descendents */
+        void visualizeGraph();
 };
 
 // /* Deserialization to JSON */

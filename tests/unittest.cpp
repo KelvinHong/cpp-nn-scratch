@@ -246,6 +246,42 @@ int testNode()
     LPtr -> backward();
     }
 
+    /* Test visualization */
+    {
+    Eigen::MatrixXd x(3,2);
+    x << 1,2,
+        1,5,
+        -1, 2;
+    Eigen::MatrixXd weights1(5,2);
+    weights1 << 2,0.4,
+                1,-0.3,
+                -1,0,
+                0.5,0.1,
+                1,2;
+    Eigen::MatrixXd weights2(4,5);
+    weights2 << 0,0,1,2,0.1,
+                5,4,0.2,-0.4,-0.3,
+                -0.1,-1,-2,3,1,
+                0,0,5,2,2;
+    NSP xPtr { std::make_shared<Deep::Node>(x) };
+    NSP w1Ptr { std::make_shared<Deep::Node>(weights1, Deep::gradFn::accumulateGrad) };
+    NSP w2Ptr { std::make_shared<Deep::Node>(weights2, Deep::gradFn::accumulateGrad) };
+    /* Use the logic of 
+    L = sum( (relu(x*W1T))*W2T ) */
+    NSP LPtr {
+        (
+            (
+                (xPtr*(w1Ptr->transpose()))
+                -> relu()
+            ) * 
+            (
+                transpose(w2Ptr)
+            )
+        ) -> sum()
+    };
+    LPtr->visualizeGraph();
+    }
+
     std::cout << "All Nodes and gradFn unittests passed.\n\n";
     return 0;
 }

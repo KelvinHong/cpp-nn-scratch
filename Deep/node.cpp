@@ -5,8 +5,7 @@
 #include <set>
 
 using T = Eigen::MatrixXd;
-
-
+using NSP = std::shared_ptr<Deep::Node>;
 
 namespace nlohmann {
     void adl_serializer<T>::to_json(json& j, const T& data)
@@ -300,6 +299,33 @@ int Node::descendents(bool verbose)
     return Node::descendents(0, verbose);
 }
 
-
+void Node::visualizeGraph()
+{
+    // Create row structures
+    std::vector<std::vector<NSP>> structure {{shared_from_this()}};
+    while (true)
+    {
+        // Exhaust all children 
+        std::vector<NSP> par {structure.back()};
+        std::vector<NSP> children {};
+        for (NSP p: par)
+        {
+            auto nextnodes { p->nextNodes };
+            children.insert(children.end(), nextnodes.begin(), nextnodes.end());
+        }
+        if (children.size() == 0)
+            break;
+        structure.push_back(children);
+    }
+    // Show result
+    for (std::vector<NSP> alayer: structure)
+    {
+        for (NSP anode: alayer)
+        {
+            std::cout << anode -> gradientFunction << ' ';
+        }
+        std::cout << '\n';
+    }
+}
 
 }

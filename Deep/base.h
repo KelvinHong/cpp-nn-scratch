@@ -47,8 +47,9 @@ class Model
         std::vector<std::pair<std::string, NSP>> namedParameters();
         void showParametersInfo();
         std::vector<NSP> parameters();
-        // Save model's parameter into a path.
+        // Save model's parameters into a path.
         void saveStateDict(std::string modelPath);
+        // Load model's parameters from a path.
         void loadStateDict(std::string modelPath);
         virtual NSP forward(NSP in);
         virtual ~Model() = default;
