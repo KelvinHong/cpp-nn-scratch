@@ -11,6 +11,7 @@ models/*
 # Eigen package
 include/*
 !include/.gitignore
+!include/svg.hpp
 
 # VSCode settings
 .vscode/*
