@@ -1,3 +1,6 @@
+# SVG files
+*.svg
+
 # Playground cpp
 playtest.cpp
 

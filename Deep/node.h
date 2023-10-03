@@ -1,5 +1,6 @@
 #ifndef NODE_H
 #define NODE_H
+#include <svg.hpp>
 #include <nlohmann/json.hpp>
 #include <Eigen/Dense>
 #include <boost/preprocessor.hpp> // For enum to string.
@@ -49,18 +50,14 @@ namespace Deep
 DEFINE_ENUM_WITH_STRING_CONVERSIONS(gradFn, (none)(accumulateGrad)(transposeBackward)
     (matMulBackward)(reluBackward)(sumBackward)
     (addBackward)(addMmBackward)(subtractBackward)(mseBackward));
-// enum gradFn {
-//     none, // none shouldn't be used in this stage where we assume every node requires gradient. 
-//     accumulateGrad,
-//     transposeBackward,
-//     matMulBackward,
-//     reluBackward,
-//     sumBackward,
-//     addBackward,
-//     addMmBackward,
-//     subtractBackward,
-//     mseBackward,
-// };
+
+namespace svgUtility
+{
+/* Provided TopLeft coordinate of two Points (from->to),
+dimension of nodes (nodeW, nodeH),
+accurately create a polygon object that connects two Points. */
+svg::Polygon getLink(svg::Point fromPoint, svg::Point toPoint, int nodeW, int nodeH);
+};
 
 class Node : public std::enable_shared_from_this<Node>
 {
@@ -114,14 +111,8 @@ class Node : public std::enable_shared_from_this<Node>
         int descendents(bool verbose);
 
         /* Visualize descendents */
-        void visualizeGraph();
+        void visualizeGraph(std::string path);
 };
-
-// /* Deserialization to JSON */
-// void to_json(json& j, const T& data);
-
-// /* Serialization from JSON */
-// void from_json(const json& j, T& data);
 
 }
 

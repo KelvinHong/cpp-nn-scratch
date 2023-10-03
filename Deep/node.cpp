@@ -1,11 +1,15 @@
 #include "node.h"
+#include <svg.hpp>
 #include <Eigen/Dense>
 #include <vector>
 #include <iostream>
 #include <set>
+#include <unordered_map>
+#include <cmath>
 
 using T = Eigen::MatrixXd;
 using NSP = std::shared_ptr<Deep::Node>;
+using namespace svg;
 
 namespace nlohmann {
     void adl_serializer<T>::to_json(json& j, const T& data)
@@ -29,9 +33,53 @@ namespace nlohmann {
 namespace Deep
 {
 
-/* This is kind of a bad design, I know,
-hopefully I can find a more elegant way if this
-project become bigger :) */
+svg::Polygon svgUtility::getLink(svg::Point fromPoint, svg::Point toPoint, int nodeW, int nodeH)
+{
+    constexpr double sqrt2by2 { 0.707107 };
+    svg::Polygon arrow(Stroke(.5, Color::Blue));
+    int wingLen {nodeH / 2}; // Length of arrow wings
+    /* Guard no operation */
+    if (fromPoint.x == toPoint.x && fromPoint.y == toPoint.y)
+        return arrow;
+    svg::Point exactFrom {};
+    svg::Point exactTo {};
+    if (fromPoint.y < toPoint.y)
+    {
+        exactFrom = svg::Point(fromPoint.x + nodeW / 2, fromPoint.y + nodeH);
+        exactTo = svg::Point(toPoint.x + nodeW / 2, toPoint.y);
+    }
+    else if (fromPoint.y == toPoint.y && fromPoint.x < toPoint.x)
+    {
+        exactFrom = svg::Point(fromPoint.x + nodeW, fromPoint.y + nodeH / 2);
+        exactTo = svg::Point(toPoint.x, toPoint.y + nodeH / 2);
+    }
+    else if (fromPoint.y == toPoint.y && fromPoint.x > toPoint.x)
+    {
+        exactFrom = svg::Point(fromPoint.x, fromPoint.y + nodeH / 2);
+        exactTo = svg::Point(toPoint.x + nodeW, toPoint.y + nodeH / 2);
+    }
+    else 
+    {
+        exactFrom = svg::Point(fromPoint.x + nodeW / 2, fromPoint.y);
+        exactTo = svg::Point(toPoint.x + nodeW / 2, toPoint.y + nodeH);
+    }
+    svg::Point vec(exactTo.x - exactFrom.x, exactTo.y - exactFrom.y);
+    double arrowLength { std::sqrt(vec.x * vec.x + vec.y * vec.y) };
+    
+    vec = svg::Point(vec.x * wingLen / arrowLength, vec.y * wingLen / arrowLength);
+    svg::Point leftWing(
+        static_cast<int>(exactTo.x + sqrt2by2 * (-vec.x +vec.y)), 
+        static_cast<int>(exactTo.y - sqrt2by2 * (vec.x+vec.y))
+    );
+    svg::Point rightWing(
+        static_cast<int>(exactTo.x - sqrt2by2 * (vec.x+vec.y)), 
+        static_cast<int>(exactTo.y + sqrt2by2 * (vec.x-vec.y))
+    );
+
+    arrow << exactFrom << exactTo << leftWing << exactTo << rightWing << exactTo << exactFrom;
+    return arrow;
+}
+
 std::ostream& operator<<(std::ostream& out, const gradFn gf){
     out << ToString(gf);  
     return out;
@@ -299,10 +347,14 @@ int Node::descendents(bool verbose)
     return Node::descendents(0, verbose);
 }
 
-void Node::visualizeGraph()
+void Node::visualizeGraph(std::string path)
 {
+    int maxNode { 1 }; // Maximum number of nodes in a layer.
+    int numLayers { 0 };
     // Create row structures
     std::vector<std::vector<NSP>> structure {{shared_from_this()}};
+    {
+    std::set<NSP> visited {shared_from_this()};
     while (true)
     {
         // Exhaust all children 
@@ -311,21 +363,102 @@ void Node::visualizeGraph()
         for (NSP p: par)
         {
             auto nextnodes { p->nextNodes };
-            children.insert(children.end(), nextnodes.begin(), nextnodes.end());
+            std::vector<NSP> uniqueNextNodes {};
+            for (NSP nextnode: nextnodes)
+            {
+                if (visited.find(nextnode) == visited.end())
+                {
+                    uniqueNextNodes.push_back(nextnode);
+                    visited.insert(nextnode);
+                }
+            }
+            children.insert(children.end(), uniqueNextNodes.begin(), uniqueNextNodes.end());
         }
-        if (children.size() == 0)
+        const int nChildren { static_cast<int>(children.size()) };
+        if (nChildren == 0)
             break;
+        maxNode = std::max(maxNode, nChildren);
         structure.push_back(children);
     }
-    // Show result
-    for (std::vector<NSP> alayer: structure)
-    {
-        for (NSP anode: alayer)
-        {
-            std::cout << anode -> gradientFunction << ' ';
-        }
-        std::cout << '\n';
     }
+    
+    numLayers = static_cast<int>(structure.size());
+
+    // Show result
+    // for (std::vector<NSP> alayer: structure)
+    // {
+    //     for (NSP anode: alayer)
+    //     {
+    //         std::cout << anode -> gradientFunction << ' ';
+    //     }
+    //     std::cout << '\n';
+    // }
+
+    // Plot into SVG
+    /* Use rectangle with height and width (h, w) to represent a node.
+    Recommend all numbers be even integers. */
+    int h {50};
+    int w {250};
+    int gapH {100}; // Vertical gap between two nodes
+    int gapW {50}; // Horizontal gap between two nodes
+    int margin {30}; // Margin space of four borders
+    int marginT {margin}, marginB {margin}, marginL {margin}, marginR {margin};
+    int svgWidth {marginL + marginR + maxNode * (w + gapW) - gapW};
+    int svgHeight {marginT + marginB + numLayers * (h + gapH) - gapH};
+    // This map record the location (x,y) of each NSP.
+    std::unordered_map<NSP, Point> locator {};
+    Dimensions dimensions(svgWidth, svgHeight);
+    Document graph(path, Layout(dimensions, Layout::TopLeft));
+
+    {
+    // Add border
+    Polygon border(Stroke(1, Color::Green));
+    border << Point(0, 0) << Point(dimensions.width, 0)
+        << Point(dimensions.width, dimensions.height) << Point(0, dimensions.height);
+    graph << border;
+
+    
+    }
+
+    // Add nodes
+    for (int level=0; level<numLayers; ++level)
+    {
+        const int y { marginT + level * (h + gapH) };
+        const std::vector<NSP> thisLayer { structure[level] };
+        const int thisLayerN { static_cast<int>(thisLayer.size()) };
+        const int xBase { marginL + (maxNode - thisLayerN) * (w + gapW) / 2 };
+        for (int nodeInd=0; nodeInd<thisLayerN; ++nodeInd)
+        {
+            NSP thisNode {thisLayer[nodeInd]};
+            const int x { xBase + nodeInd * (w+gapW) };
+            const int textX { x + w/8 };
+            const int textY { y + h/2 };
+            std::string dimensionStr {};
+            dimensionStr += " (row=" + std::to_string(thisNode->data.rows())
+                         + ",col=" + std::to_string(thisNode->data.cols()) + ")";
+            graph << Rectangle(Point(x, y), w, h, Color::White, Stroke(3, Color::Black));
+            graph << Text(Point(textX, textY), ToString(thisNode->gradientFunction) + dimensionStr,
+                Color::Black);
+            locator[thisNode] = Point(x,y);
+        }
+    }
+
+    // Add links by referring to locator
+    for (std::unordered_map<NSP, Point>::iterator it=locator.begin(); 
+        it!=locator.end(); ++it)
+    {
+        NSP fromThisNSP {(*it).first};
+        Point fromThisPoint {(*it).second};
+        for (NSP toThisNSP: fromThisNSP -> nextNodes)
+        {
+            graph << svgUtility::getLink(fromThisPoint, locator[toThisNSP], w, h);
+        }
+    }
+
+
+
+
+    graph.save();
 }
 
 }

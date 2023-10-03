@@ -246,7 +246,7 @@ int testNode()
     LPtr -> backward();
     }
 
-    /* Test visualization */
+    /* Test visualization 1 */
     {
     Eigen::MatrixXd x(3,2);
     x << 1,2,
@@ -279,7 +279,22 @@ int testNode()
             )
         ) -> sum()
     };
-    LPtr->visualizeGraph();
+    LPtr->visualizeGraph("unittest1.svg");
+    }
+
+    /* Test visualization 2 */
+    {
+    MyReg model {};
+    Eigen::MatrixXd x(4,5);
+    x.fill(0.5);
+    Eigen::MatrixXd label(4,1);
+    label.fill(1.5);
+    NSP xPtr {std::make_shared<Deep::Node>(x)};
+    NSP yPtr {model.forward(xPtr)};
+    NSP LPtr {Deep::MSE(yPtr, label)};
+    /* Use the logic of 
+    L = sum( (relu(x*W1T))*W2T ) */
+    LPtr->visualizeGraph("unittest2.svg");
     }
 
     std::cout << "All Nodes and gradFn unittests passed.\n\n";
