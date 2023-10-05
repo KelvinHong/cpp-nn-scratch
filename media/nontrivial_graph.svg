@@ -1,0 +1,23 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="610px" height="710px" xmlns="http://www.w3.org/2000/svg" version="1.1" >
+	<polygon points="0,0 610,0 610,710 0,710 " fill="none" stroke-width="1" stroke="rgb(0,128,0)" />
+	<rect x="180" y="30" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="55" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >sumBackward (row=1,col=1)</text>
+	<rect x="180" y="180" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="205" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >addBackward (row=2,col=3)</text>
+	<rect x="30" y="330" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="61" y="355" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >reluBackward (row=2,col=3)</text>
+	<rect x="330" y="330" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="361" y="355" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >none (row=2,col=3)</text>
+	<rect x="180" y="480" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="505" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >matMulBackward (row=2,col=3)</text>
+	<rect x="180" y="630" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="655" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=3,col=3)</text>
+	<polygon points="305,480 455,380 430,375 455,380 450,404 455,380 305,480 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,530 305,630 322,612 305,630 287,612 305,630 305,530 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="155,380 305,480 300,455 305,480 280,484 305,480 155,380 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,230 155,330 179,334 155,330 159,305 155,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,230 455,330 450,305 455,330 430,334 455,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,80 305,180 322,162 305,180 287,162 305,180 305,80 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+</svg>

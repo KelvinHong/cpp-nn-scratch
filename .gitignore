@@ -1,5 +1,6 @@
 # SVG files
 *.svg
+!media/*.svg
 
 # Playground cpp
 playtest.cpp

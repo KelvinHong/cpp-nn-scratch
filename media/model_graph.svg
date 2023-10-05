@@ -1,0 +1,70 @@
+<?xml version="1.0" standalone="no" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="910px" height="1460px" xmlns="http://www.w3.org/2000/svg" version="1.1" >
+	<polygon points="0,0 910,0 910,1460 0,1460 " fill="none" stroke-width="1" stroke="rgb(0,128,0)" />
+	<rect x="330" y="30" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="361" y="55" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >mseBackward (row=1,col=1)</text>
+	<rect x="180" y="180" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="205" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >addMmBackward (row=5,col=1)</text>
+	<rect x="480" y="180" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="511" y="205" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >none (row=5,col=1)</text>
+	<rect x="30" y="330" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="61" y="355" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=1,col=1)</text>
+	<rect x="330" y="330" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="361" y="355" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >reluBackward (row=5,col=32)</text>
+	<rect x="630" y="330" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="661" y="355" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >transposeBackward (row=32,col=1)</text>
+	<rect x="180" y="480" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="505" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >addMmBackward (row=5,col=32)</text>
+	<rect x="480" y="480" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="511" y="505" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=1,col=32)</text>
+	<rect x="30" y="630" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="61" y="655" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=32,col=1)</text>
+	<rect x="330" y="630" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="361" y="655" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >reluBackward (row=5,col=64)</text>
+	<rect x="630" y="630" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="661" y="655" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >transposeBackward (row=64,col=32)</text>
+	<rect x="180" y="780" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="805" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >addMmBackward (row=5,col=64)</text>
+	<rect x="480" y="780" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="511" y="805" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=32,col=64)</text>
+	<rect x="30" y="930" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="61" y="955" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=64,col=1)</text>
+	<rect x="330" y="930" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="361" y="955" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >reluBackward (row=5,col=64)</text>
+	<rect x="630" y="930" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="661" y="955" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >transposeBackward (row=64,col=64)</text>
+	<rect x="180" y="1080" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="211" y="1105" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >addMmBackward (row=5,col=64)</text>
+	<rect x="480" y="1080" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="511" y="1105" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=64,col=64)</text>
+	<rect x="30" y="1230" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="61" y="1255" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=64,col=1)</text>
+	<rect x="330" y="1230" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="361" y="1255" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >none (row=5,col=11)</text>
+	<rect x="630" y="1230" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="661" y="1255" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >transposeBackward (row=11,col=64)</text>
+	<rect x="330" y="1380" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
+	<text x="361" y="1405" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=64,col=11)</text>
+	<polygon points="455,980 305,1080 329,1084 305,1080 309,1055 305,1080 455,980 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="755,1280 455,1380 477,1391 455,1380 466,1357 455,1380 755,1280 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="455,80 305,180 329,184 305,180 309,155 305,180 455,80 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="455,80 605,180 600,155 605,180 580,184 605,180 455,80 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,230 155,330 179,334 155,330 159,305 155,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,230 455,330 450,305 455,330 430,334 455,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,230 755,330 741,308 755,330 733,343 755,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="755,980 605,1080 629,1084 605,1080 609,1055 605,1080 755,980 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,530 155,630 179,634 155,630 159,605 155,630 305,530 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,530 455,630 450,605 455,630 430,634 455,630 305,530 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,530 755,630 741,608 755,630 733,643 755,630 305,530 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,830 155,930 179,934 155,930 159,905 155,930 305,830 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,830 455,930 450,905 455,930 430,934 455,930 305,830 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,830 755,930 741,908 755,930 733,943 755,930 305,830 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="455,380 305,480 329,484 305,480 309,455 305,480 455,380 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,1130 155,1230 179,1234 155,1230 159,1205 155,1230 305,1130 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,1130 455,1230 450,1205 455,1230 430,1234 455,1230 305,1130 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,1130 755,1230 741,1208 755,1230 733,1243 755,1230 305,1130 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="455,680 305,780 329,784 305,780 309,755 305,780 455,680 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="755,380 605,480 629,484 605,480 609,455 605,480 755,380 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="755,680 605,780 629,784 605,780 609,755 605,780 755,680 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+</svg>
