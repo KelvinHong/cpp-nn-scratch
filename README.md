@@ -72,6 +72,7 @@ show two backward graphs saved in svg files:
 `generate1.svg, generate2.svg`.
 
 We built an MLP with some hidden layers, its graph can be seen as below:
+(view it in white background if currently your browser is in dark mode.)
 ![sample SVG image](media/model_graph.svg)
 
 We also built a toy example using the formula
@@ -79,4 +80,5 @@ We also built a toy example using the formula
 $$ L = \sum (\text{ReLU }(XW) + X) $$
 with `x.shape=[2,3], w.shape=[3,3]`. 
 
+(view it in white background if currently your browser is in dark mode.)
 ![sample SVG image 2](media/nontrivial_graph.svg)
