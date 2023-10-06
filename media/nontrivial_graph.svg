@@ -14,10 +14,10 @@
 	<text x="211" y="505" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >matMulBackward (row=2,col=3)</text>
 	<rect x="180" y="630" width="250" height="50" fill="rgb(255,255,255)" stroke-width="3" stroke="rgb(0,0,0)" />
 	<text x="211" y="655" fill="rgb(0,0,0)" font-size="12" font-family="Verdana" >accumulateGrad (row=3,col=3)</text>
-	<polygon points="305,480 455,380 430,375 455,380 450,404 455,380 305,480 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
-	<polygon points="305,530 305,630 322,612 305,630 287,612 305,630 305,530 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
-	<polygon points="155,380 305,480 300,455 305,480 280,484 305,480 155,380 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
-	<polygon points="305,230 155,330 179,334 155,330 159,305 155,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
-	<polygon points="305,230 455,330 450,305 455,330 430,334 455,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
-	<polygon points="305,80 305,180 322,162 305,180 287,162 305,180 305,80 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,480 455,380 435,382 455,380 445,397 455,380 305,480 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,530 305,630 313,612 305,630 296,612 305,630 305,530 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="155,380 305,480 295,462 305,480 285,477 305,480 155,380 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,230 155,330 174,327 155,330 164,312 155,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,230 455,330 445,312 455,330 435,327 455,330 305,230 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
+	<polygon points="305,80 305,180 313,162 305,180 296,162 305,180 305,80 " fill="none" stroke-width="0.5" stroke="rgb(0,0,255)" />
 </svg>

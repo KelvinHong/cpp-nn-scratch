@@ -68,12 +68,12 @@ svg::Polygon svgUtility::getLink(svg::Point fromPoint, svg::Point toPoint, int n
     
     vec = svg::Point(vec.x * wingLen / arrowLength, vec.y * wingLen / arrowLength);
     svg::Point leftWing(
-        static_cast<int>(exactTo.x + sqrt2by2 * (-vec.x +vec.y)), 
-        static_cast<int>(exactTo.y - sqrt2by2 * (vec.x+vec.y))
+        static_cast<int>(exactTo.x + sqrt2by2 * (-vec.x + 0.5*vec.y)), 
+        static_cast<int>(exactTo.y + sqrt2by2 * (-0.5*vec.x-vec.y))
     );
     svg::Point rightWing(
-        static_cast<int>(exactTo.x - sqrt2by2 * (vec.x+vec.y)), 
-        static_cast<int>(exactTo.y + sqrt2by2 * (vec.x-vec.y))
+        static_cast<int>(exactTo.x + sqrt2by2 * (-vec.x-0.5*vec.y)), 
+        static_cast<int>(exactTo.y + sqrt2by2 * (0.5*vec.x-vec.y))
     );
 
     arrow << exactFrom << exactTo << leftWing << exactTo << rightWing << exactTo << exactFrom;
