@@ -10,6 +10,12 @@ This is my hobby project so please don't use this for any kind of production lev
 tasks. It only serves as a purpose of strengthen my deep learning understanding 
 and C++ skills.  
 
+## Ongoing work
+
+I'm trying to switch the codebase to a header-only, template class style. 
+This allows for `Nodes` with not only type of `Eigen::MatrixXd` 
+but also `Eigen::MatrixXf` and potentially tensor type.
+
 ## Capabilities
 
 - 100% Compatible with C++11 standard.
